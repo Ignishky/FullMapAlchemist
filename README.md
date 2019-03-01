@@ -1,6 +1,6 @@
 # FullMapAlchemist
 
-[![Build Status](https://travis-ci.org/ignishky/FullMapAlchemist.svg?branch=master)](https://travis-ci.org/ignishky/FullMapAlchemist)
+[![Build Status](https://travis-ci.com/Ignishky/FullMapAlchemist.svg?token=yU7cS6vFNuj477t5rJws&branch=master)](https://travis-ci.org/ignishky/FullMapAlchemist)
 [![GitHub release](https://img.shields.io/github/release/ignishky/FullMapAlchemist.svg)]()
 
 This project aim to help people using OSM great tools with other provider data.
