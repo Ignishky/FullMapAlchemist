@@ -3,13 +3,16 @@ package fr.ignishky.fma.generator;
 import fr.ignishky.fma.generator.converter.CountryConverter;
 import fr.ignishky.fma.generator.merger.OsmMerger;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,6 +22,7 @@ class MainTest {
 
     private static final File INPUT_FOLDER = new File("src/test/resources/input");
     private static final File OUTPUT_FOLDER = new File("target/generator");
+    private final ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
     private final CountryConverter countryConverter = mock(CountryConverter.class);
     private final OsmMerger osmMerger = mock(OsmMerger.class);
@@ -32,6 +36,7 @@ class MainTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void should_delegate_to_country_generator() {
 
         when(countryConverter.generate("and")).thenReturn("and.osm.pbf");
@@ -42,8 +47,8 @@ class MainTest {
         main.run();
 
         verify(countryConverter, times(2)).generate(any(String.class));
-        verify(countryConverter).generate("and");
-        verify(countryConverter).generate("lux");
-        verify(osmMerger).merge(newArrayList("lux.osm.pbf", "and.osm.pbf"), Paths.get("target/generator/Europe.osm.pbf"));
+
+        verify(osmMerger).merge(argumentCaptor.capture(), eq(Paths.get("target/generator/Europe.osm.pbf")));
+        assertThat(argumentCaptor.getValue()).containsOnly("lux.osm.pbf", "and.osm.pbf");
     }
 }

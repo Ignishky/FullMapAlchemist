@@ -15,6 +15,6 @@ It's divided into 3 modules :
 
 To compile the code, you need : **Java 8+**
 
-To build the project, you need : **Maven 3.2+**
+To build the project, you need : **Maven 3.4+**
 
 To run the project, you need : **Docker**
