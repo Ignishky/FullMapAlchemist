@@ -23,7 +23,7 @@ public class PbfSink implements Sink {
             serializer = new OsmosisSerializer(os);
         } catch (FileNotFoundException e) {
             log.error("Unable to create output directory {}", output, e);
-            throw new IllegalStateException("Unable to create output directory {}" + output, e);
+            throw new IllegalStateException("Unable to create output directory " + output, e);
         }
     }
 }

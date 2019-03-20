@@ -34,6 +34,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        log.debug("Start generating OSM PBF files.");
         checkArgument(args.length == 2, "Usage : Main <inputFolder> <outputFolder>");
 
         createInjector(new GeneratorModule(args[0], args[1])).getInstance(Main.class).run();

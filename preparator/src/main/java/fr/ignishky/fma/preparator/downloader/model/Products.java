@@ -11,6 +11,7 @@ public class Products {
 
     @Value
     public static class Product {
+
         String name;
         String location;
     }

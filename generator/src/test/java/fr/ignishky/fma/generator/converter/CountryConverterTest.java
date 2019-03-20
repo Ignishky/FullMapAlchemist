@@ -29,14 +29,14 @@ class CountryConverterTest {
             capitalProvider, zoneConverter, osmMerger);
 
     @Test
-    public void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
+    void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
         assertThrows(IllegalArgumentException.class, () -> countryConverter.generate("fake"));
         verifyZeroInteractions(capitalProvider, zoneConverter);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void should_generate_zones_and_merge_them_into_country_file() {
+    void should_generate_zones_and_merge_them_into_country_file() {
 
         when(zoneConverter.generate("lux", "ax", capitalProvider)).thenReturn("lux-ax.osm.pbf");
         when(zoneConverter.generate("lux", "lux", capitalProvider)).thenReturn("lux-lux.osm.pbf");

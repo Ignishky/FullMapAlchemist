@@ -43,7 +43,7 @@ public class ZoneConverter {
 
         log.info("Generate zone '{}-{}' with products : {}", countryCode, zoneCode, of(products).map(s -> s.substring(17, 19)).collect(toSet()));
 
-        List<String> convertFiles = new ArrayList<>();
+        List<String> convertFiles = new ArrayList<>(1);
 
         if ("ax".equals(zoneCode)) {
             convertFiles.add(a0Shapefile.convert(countryCode, zoneCode, capitalProvider));

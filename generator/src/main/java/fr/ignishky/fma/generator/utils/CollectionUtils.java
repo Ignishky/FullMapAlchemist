@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class CollectionUtils {
+public final class CollectionUtils {
 
     private CollectionUtils() {}
 

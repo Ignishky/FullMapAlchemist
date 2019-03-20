@@ -1,9 +1,10 @@
 package fr.ignishky.fma.generator;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.name.Names;
 
 import java.io.File;
+
+import static com.google.inject.name.Names.named;
 
 public class GeneratorModule extends AbstractModule {
 
@@ -18,7 +19,7 @@ public class GeneratorModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(File.class).annotatedWith(Names.named("inputFolder")).toInstance(inputFolder);
-        bind(File.class).annotatedWith(Names.named("outputFolder")).toInstance(outputFolder);
+        bind(File.class).annotatedWith(named("inputFolder")).toInstance(inputFolder);
+        bind(File.class).annotatedWith(named("outputFolder")).toInstance(outputFolder);
     }
 }

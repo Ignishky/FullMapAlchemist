@@ -5,7 +5,7 @@ import com.vividsolutions.jts.geom.Point;
 import static com.github.davidmoten.geo.GeoHash.encodeHash;
 import static com.google.common.base.Preconditions.checkState;
 
-public class Geohash {
+public final class Geohash {
 
     private static final String SYMBOLS = "psc8b9fzejv0uhx1nm5rgt4yk3d627qw";
     private static final int[] lookup = indexByLetter();
@@ -40,7 +40,7 @@ public class Geohash {
     private static int[] indexByLetter() {
         int[] lookup = new int[128];
         int i = 0;
-        for (char ch : Geohash.SYMBOLS.toCharArray()) {
+        for (char ch : SYMBOLS.toCharArray()) {
             lookup[ch] = i++;
         }
         return lookup;

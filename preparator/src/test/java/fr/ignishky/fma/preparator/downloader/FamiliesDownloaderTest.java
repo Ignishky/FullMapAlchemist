@@ -1,17 +1,19 @@
 package fr.ignishky.fma.preparator.downloader;
 
-import fr.ignishky.fma.preparator.downloader.model.Families;
+import fr.ignishky.fma.preparator.downloader.model.Families.Family;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.FileEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.stream.Stream;
 
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,24 +22,26 @@ class FamiliesDownloaderTest {
 
     private final HttpClient client = mock(HttpClient.class);
 
-    private FamiliesDownloader familiesDownloader;
+    private final FamiliesDownloader familiesDownloader = new FamiliesDownloader(client, TOKEN);
 
-    @BeforeEach
-    public void setUp() throws Exception {
+    @Test
+    void should_throws_IllegalStateException_when_client_throws_IOException() throws Exception {
 
-        HttpResponse response = mock(HttpResponse.class);
-        when(response.getEntity()).thenReturn(new FileEntity(new File(getClass().getResource("/downloader/families.json").toURI())));
+        when(client.execute(any(HttpGet.class))).thenThrow(new IOException("Families Test Exception"));
 
-        when(client.execute(any(HttpGet.class))).thenReturn(response);
-
-        familiesDownloader = new FamiliesDownloader(client, "validToken");
+        assertThrows(IllegalStateException.class, familiesDownloader::get);
     }
 
     @Test
-    public void should_only_download_mn_sp_2dcm_families() {
+    void should_download_families() throws Exception {
 
-        Stream<Families.Family> families = familiesDownloader.get();
+        HttpResponse response = mock(HttpResponse.class);
+        when(response.getEntity()).thenReturn(new FileEntity(new File("src/test/resources/downloader/families.json")));
 
-        assertThat(families).containsOnly(new Families.Family("MN", "https://api.test/families/300"));
+        when(client.execute(any(HttpGet.class))).thenReturn(response);
+
+        Stream<Family> families = familiesDownloader.get();
+
+        assertThat(families).containsOnly(new Family("MN", "https://api.test/families/300"));
     }
 }

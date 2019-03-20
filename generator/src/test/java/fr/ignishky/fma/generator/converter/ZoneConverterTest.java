@@ -26,16 +26,17 @@ class ZoneConverterTest {
     private final CapitalProvider capitalProvider = mock(CapitalProvider.class);
     private final ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
-    private final ZoneConverter zoneConverter = new ZoneConverter(new File("src/test/resources/input"), new File("target/generator"), a0Shapefile, osmMerger);
+    private final ZoneConverter zoneConverter = new ZoneConverter(new File("src/test/resources/input"), new File("target/generator"),
+            a0Shapefile, osmMerger);
 
     @Test
-    public void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
+    void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
         assertThrows(IllegalArgumentException.class, () -> zoneConverter.generate("lux", "fake", null));
         verifyZeroInteractions(a0Shapefile, capitalProvider);
     }
 
     @Test
-    public void should_only_call_a0_with_ax_zone() {
+    void should_only_call_a0_with_ax_zone() {
         zoneConverter.generate("lux", "lux", capitalProvider);
 
         verifyZeroInteractions(a0Shapefile, capitalProvider);
@@ -43,7 +44,7 @@ class ZoneConverterTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void should_convert_all_shapefile_into_OSM_format() {
+    void should_convert_all_shapefile_into_OSM_format() {
         when(a0Shapefile.convert("lux", "ax", capitalProvider)).thenReturn("convertLuxAx.osm.pbf");
 
         String generate = zoneConverter.generate("lux", "ax", capitalProvider);

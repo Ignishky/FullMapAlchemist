@@ -15,7 +15,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.OUTPUT_FOLDER;
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 public class ArchiveDownloader implements Function<Content, File> {
@@ -25,23 +29,24 @@ public class ArchiveDownloader implements Function<Content, File> {
     private final String token;
 
     @Inject
-    public ArchiveDownloader(@Named("outputFolder") File outputFolder, HttpClient client, @Named("token") String token) {
+    ArchiveDownloader(@Named(OUTPUT_FOLDER) File outputFolder, HttpClient client, @Named(TOKEN) String token) {
         this.outputFolder = outputFolder;
         this.client = client;
         this.token = token;
     }
 
     public File apply(Content content) {
-        File downloaded = new File(outputFolder, content.getName());
+        String name = content.getName();
+        File downloaded = new File(outputFolder, name);
 
         String archiveUrl = content.getLocation() + "/download-url";
         HttpGet get = new HttpGet(archiveUrl);
-        get.addHeader("Authorization", token);
+        get.addHeader(AUTHORIZATION, token);
 
-        log.info("Get redirect URL for {} ({})", content.getName(), archiveUrl);
+        log.info("Get redirect URL for {} ({})", name, archiveUrl);
         try (InputStream redirect = client.execute(get).getEntity().getContent()) {
 
-            String redirectUrl = new Gson().fromJson(IOUtils.toString(redirect, "UTF-8"), Redirect.class).getUrl();
+            String redirectUrl = new Gson().fromJson(IOUtils.toString(redirect, UTF_8), Redirect.class).getUrl();
 
             log.info("Downloading {} to {}", redirectUrl, downloaded.getAbsolutePath());
             try (InputStream archive = client.execute(new HttpGet(redirectUrl)).getEntity().getContent()) {
@@ -50,12 +55,12 @@ public class ArchiveDownloader implements Function<Content, File> {
             return downloaded;
 
         } catch (IOException e) {
-            throw new IllegalStateException("Something goes wrong while processing " + content.getName(), e);
+            throw new IllegalStateException("Something goes wrong while downloading archive " + name, e);
         }
     }
 
     @Value
-    private class Redirect {
+    private static class Redirect {
         String url;
     }
 }

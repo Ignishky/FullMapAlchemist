@@ -13,30 +13,30 @@ public enum CityType {
     ADMINISTRATIVE_AREA_IMPORTANT(1, true, "city"),
     ADMINISTRATIVE_PLACE_SIMPLE(2, false, "town"),
     ADMINISTRATIVE_PLACE_IMPORTANT(2, true, "city"),
-    POSTAL(4, null, "locality"),
-    BUILT_UP_AREA(8, null, "quarter"),
-    CENSUS(16, null, "quarter"),
-    HAMLET(32, null, "hamlet"),
-    NEIGHBORHOOD(64, null, "neighbourhood");
+    POSTAL(4, false, "locality"),
+    BUILT_UP_AREA(8, false, "quarter"),
+    CENSUS(16, false, "quarter"),
+    HAMLET(32, false, "hamlet"),
+    NEIGHBORHOOD(64, false, "neighbourhood");
 
-    private final Integer key;
-    private final Boolean important;
+    private final int key;
+    private final boolean important;
     private final String value;
 
-    CityType(Integer key, Boolean important, String value) {
+    CityType(int key, boolean important, String value) {
         this.key = key;
         this.important = important;
         this.value = value;
     }
 
-    public static String getOsmValue(Integer value, Integer displayClass) {
+    public static String getOsmValue(int value, int displayClass) {
         return Stream.of(CityType.values())
                 .filter(cityType -> isTheBiggestCityType(value, displayClass < 8, cityType))
                 .map(CityType::getValue)
                 .findFirst().orElse("town");
     }
 
-    private static boolean isTheBiggestCityType(Integer value, Boolean displayClass, CityType cityType) {
-        return cityType.getKey().equals(value) && (cityType.getImportant() == null || cityType.getImportant().equals(displayClass));
+    private static boolean isTheBiggestCityType(int value, boolean displayClass, CityType cityType) {
+        return cityType.key == value && cityType.important == displayClass;
     }
 }

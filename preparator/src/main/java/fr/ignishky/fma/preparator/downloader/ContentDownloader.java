@@ -19,19 +19,23 @@ import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 import static fr.ignishky.fma.preparator.downloader.utils.Constants.PATTERN_7ZIP_FILE;
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 public class ContentDownloader implements Function<Release, Stream<Content>> {
 
-    private static final List<String> ALLOWED = asList("mn");
+    private static final List<String> ALLOWED = singletonList("mn");
     private static final List<String> COUNTRIES = asList("bel", "lux", "nld");
 
     private final HttpClient client;
     private final String token;
 
     @Inject
-    public ContentDownloader(HttpClient client, @Named("token") String token) {
+    ContentDownloader(HttpClient client, @Named(TOKEN) String token) {
         this.client = client;
         this.token = token;
     }
@@ -42,17 +46,17 @@ public class ContentDownloader implements Function<Release, Stream<Content>> {
         log.info("Get content shpd from {} ({})", release.getVersion(), contentUrl);
 
         HttpGet get = new HttpGet(contentUrl);
-        get.addHeader("Authorization", token);
+        get.addHeader(AUTHORIZATION, token);
 
         try (InputStream response = client.execute(get).getEntity().getContent()) {
 
-            return new Gson().fromJson(IOUtils.toString(response, "UTF-8"), Contents.class).getContent().stream()
+            return new Gson().fromJson(IOUtils.toString(response, UTF_8), Contents.class).getContent().stream()
                     .filter(content -> {
                         Matcher matcher = PATTERN_7ZIP_FILE.matcher(content.getName());
                         return matcher.matches() && ALLOWED.contains(matcher.group(3)) && COUNTRIES.contains(matcher.group(4));
                     });
         } catch (IOException e) {
-            throw new IllegalStateException("Something goes wrong while processing " + release.getVersion(), e);
+            throw new IllegalStateException("Something goes wrong while downloading content " + release.getVersion(), e);
         }
     }
 }

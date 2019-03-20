@@ -7,10 +7,12 @@ import fr.ignishky.fma.preparator.downloader.FamiliesDownloader;
 import fr.ignishky.fma.preparator.downloader.ProductsDownloader;
 import fr.ignishky.fma.preparator.downloader.ReleaseDownloader;
 import fr.ignishky.fma.preparator.extractor.ShapefileExtractor;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.inject.Guice.createInjector;
 
+@Slf4j
 public class Main {
 
     private final FamiliesDownloader familiesDownloader;
@@ -32,6 +34,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        log.info("Start downloading Tomtom files.");
         checkArgument(args.length == 3, "Usage : Main <outputFolder> <token> <version>");
 
         createInjector(new PreparatorModule(args[0], args[1], args[2])).getInstance(Main.class).run();

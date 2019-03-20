@@ -20,8 +20,8 @@ import static java.lang.String.format;
 public abstract class Shapefile {
 
     private final File inputFolder;
-    protected final NameProvider nameProvider;
     private final File outputFolder;
+    protected final NameProvider nameProvider;
 
     protected Shapefile(File inputFolder, NameProvider nameProvider, File outputFolder) {
         this.inputFolder = inputFolder;
@@ -53,7 +53,7 @@ public abstract class Shapefile {
         return outputZoneFile.toString();
     }
 
-    private ShapefileIterator getIterator(Path inputShapefile) {
+    private static ShapefileIterator getIterator(Path inputShapefile) {
 
         if (!inputShapefile.toFile().exists()) {
             throw new IllegalStateException("Missing file " + inputShapefile);

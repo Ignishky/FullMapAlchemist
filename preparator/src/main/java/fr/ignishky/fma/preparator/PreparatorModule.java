@@ -1,11 +1,14 @@
 package fr.ignishky.fma.preparator;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.name.Names;
 import org.apache.http.client.HttpClient;
 
 import java.io.File;
 
+import static com.google.inject.name.Names.named;
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.OUTPUT_FOLDER;
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.VERSION;
 import static org.apache.http.impl.NoConnectionReuseStrategy.INSTANCE;
 import static org.apache.http.impl.client.HttpClientBuilder.create;
 
@@ -15,7 +18,7 @@ public class PreparatorModule extends AbstractModule {
     private final String token;
     private final String version;
 
-    public PreparatorModule(String outputFolder, String token, String version) {
+    PreparatorModule(String outputFolder, String token, String version) {
         this.outputFolder = new File(outputFolder);
         this.outputFolder.mkdirs();
         this.token = token;
@@ -28,8 +31,8 @@ public class PreparatorModule extends AbstractModule {
                 .setMaxConnPerRoute(10)
                 .setConnectionReuseStrategy(INSTANCE)
                 .build());
-        bind(File.class).annotatedWith(Names.named("outputFolder")).toInstance(outputFolder);
-        bindConstant().annotatedWith(Names.named("token")).to(token);
-        bindConstant().annotatedWith(Names.named("version")).to(version);
+        bind(File.class).annotatedWith(named(OUTPUT_FOLDER)).toInstance(outputFolder);
+        bindConstant().annotatedWith(named(TOKEN)).to(token);
+        bindConstant().annotatedWith(named(VERSION)).to(version);
     }
 }

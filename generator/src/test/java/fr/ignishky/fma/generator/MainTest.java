@@ -28,7 +28,7 @@ class MainTest {
     private final OsmMerger osmMerger = mock(OsmMerger.class);
 
     @Test
-    public void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
+    void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
 
         Main main = new Main(new File("pom.xml"), OUTPUT_FOLDER, countryConverter, osmMerger);
 
@@ -37,7 +37,7 @@ class MainTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void should_delegate_to_country_generator() {
+    void should_delegate_to_country_generator() {
 
         when(countryConverter.generate("and")).thenReturn("and.osm.pbf");
         when(countryConverter.generate("lux")).thenReturn("lux.osm.pbf");

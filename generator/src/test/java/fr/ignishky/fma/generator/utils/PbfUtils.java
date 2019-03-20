@@ -12,7 +12,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class PbfUtils {
+public final class PbfUtils {
+
+    private PbfUtils() {
+    }
 
     public static PbfContent read(String pathname) {
         PbfReader reader = new PbfReader(new File(pathname), 1);
@@ -35,7 +38,7 @@ public class PbfUtils {
                 }
             }
 
-            public void initialize(Map<String, Object> arg0) {
+            public void initialize(Map<String, Object> metaData) {
             }
 
             public void complete() {

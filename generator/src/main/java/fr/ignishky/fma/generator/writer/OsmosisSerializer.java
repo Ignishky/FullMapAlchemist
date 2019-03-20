@@ -17,7 +17,6 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -30,6 +29,7 @@ import java.util.stream.IntStream;
 import static com.google.common.base.Preconditions.checkState;
 import static fr.ignishky.fma.generator.helper.Geohash.encodeGeohash;
 import static fr.ignishky.fma.generator.helper.Layers.layer;
+import static java.time.Instant.now;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -48,8 +48,8 @@ public class OsmosisSerializer implements GeometrySerializer {
 
     public OsmosisSerializer(Sink sink) {
         this.sink = sink;
-        this.date = Date.from(Instant.now());
-        this.user = new OsmUser(1, "Tomtom");
+        date = Date.from(now());
+        user = new OsmUser(1, "Tomtom");
     }
 
     @Override
@@ -70,7 +70,7 @@ public class OsmosisSerializer implements GeometrySerializer {
 
     @Override
     public Optional<Long> writeBoundary(LineString line, Map<String, String> tags) {
-        Long id = encodeGeohash(7, line.getCentroid());
+        long id = encodeGeohash(7, line.getCentroid());
 
         if (!wayTracker.contains(id)) {
             wayTracker.add(id);

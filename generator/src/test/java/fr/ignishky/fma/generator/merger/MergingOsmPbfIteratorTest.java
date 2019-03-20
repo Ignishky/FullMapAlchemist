@@ -111,7 +111,8 @@ class MergingOsmPbfIteratorTest {
 
         Iterator<EntityContainer> merge = MergingOsmPbfIterator.merge(it1, it2, it3, it4);
 
-        assertThat(streamIterator(merge).map(ec -> ec.getEntity().getId()).collect(toList())).containsExactly(1L, 2L, 3L, 4L, 15L, 6L, 13L, 5L, 20L, 21L, 22L, 24L);
+        assertThat(streamIterator(merge).map(ec -> ec.getEntity().getId()).collect(toList()))
+                .containsExactly(1L, 2L, 3L, 4L, 15L, 6L, 13L, 5L, 20L, 21L, 22L, 24L);
     }
 
     @Test
@@ -125,37 +126,37 @@ class MergingOsmPbfIteratorTest {
         assertThat(streamIterator(merge).map(ec -> ec.getEntity().getId()).collect(toList())).containsExactly(1L, 3L, 4L);
     }
 
-    private Map<String, String> toMap(Collection<Tag> tags) {
-        return tags.stream().collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()));
+    private static Map<String, String> toMap(Collection<Tag> tags) {
+        return tags.stream().collect(Collectors.toMap(Tag::getKey, Tag::getValue));
     }
 
-    private EntityContainer header(int version, Tag... tags) {
+    private static EntityContainer header(int version, Tag... tags) {
         return container(bound(version, newArrayList(tags)));
     }
 
-    private EntityContainer container(Entity entity) {
+    private static EntityContainer container(Entity entity) {
         EntityContainer container = mock(EntityContainer.class);
         when(container.getEntity()).thenReturn(entity);
         return container;
     }
 
-    private EntityContainer node(long id) {
+    private static EntityContainer node(long id) {
         return container(new Node(data(id), 0.0, 0.0));
     }
 
-    private EntityContainer way(long id) {
+    private static EntityContainer way(long id) {
         return container(new Way(data(id)));
     }
 
-    private EntityContainer relation(long id) {
+    private static EntityContainer relation(long id) {
         return container(new Relation(data(id)));
     }
 
-    private CommonEntityData data(long id) {
+    private static CommonEntityData data(long id) {
         return new CommonEntityData(id, 0, (Date) null, null, 0L);
     }
 
-    private Bound bound(int version, Collection<Tag> tags) {
+    private static Bound bound(int version, Collection<Tag> tags) {
         return new Bound("") {
             @Override
             public int getVersion() {

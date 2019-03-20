@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CapitalProviderTest {
 
-    CapitalProvider capitalProvider = new CapitalProvider(new File("src/test/resources/input"));
+    private final CapitalProvider capitalProvider = new CapitalProvider(new File("src/test/resources/input"));
 
     @Test
-    public void should_load_capital_from_zones() {
+    void should_load_capital_from_zones() {
         capitalProvider.init("and");
 
         assertEquals(capitalProvider.get(0).size(), 1);

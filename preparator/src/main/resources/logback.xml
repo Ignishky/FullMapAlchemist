@@ -2,9 +2,9 @@
 <configuration>
    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
       <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-         <!-- Filter excludes all logs when test are running in Maven context, this should be changed by adding '-DshowLogs' as a command line property-->
+         <!-- Excludes all logs in Maven context, this could be changed by adding '-DshowLogs' as a command line property -->
          <evaluator>
-            <expression>System.getProperty("surefire.test.class.path")==null || System.getProperty("showLogs")!=null</expression>
+            <expression>System.getProperty("surefire.test.class.path") == null || System.getProperty("showLogs") != null</expression>
          </evaluator>
          <OnMatch>NEUTRAL</OnMatch>
          <OnMismatch>DENY</OnMismatch>
@@ -15,10 +15,9 @@
       </encoder>
    </appender>
 
-   <root level="DEBUG">
+   <root level="WARN">
       <appender-ref ref="STDOUT"/>
    </root>
 
-   <logger name="com.amazonaws" level="ERROR"/>
-   <logger name="org.apache.http" level="INFO" />
+   <logger name="fr.ignishky" level="DEBUG"/>
 </configuration>

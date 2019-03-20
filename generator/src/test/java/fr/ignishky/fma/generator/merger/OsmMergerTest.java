@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OsmMergerTest {
 
     @Test
-    public void should_copy_the_only_input_file() throws IOException {
+    void should_copy_the_only_input_file() throws IOException {
         new File("target/output.osm.pbf").delete();
 
         new OsmMerger().merge(newArrayList("src/test/resources/output/a0.osm.pbf"), Paths.get("target/output.osm.pbf"));
@@ -22,10 +22,12 @@ class OsmMergerTest {
     }
 
     @Test
-    public void should_ignore_non_existing_file() throws IOException {
+    void should_ignore_non_existing_file() throws IOException {
         new File("target/output.osm.pbf").delete();
 
-        new OsmMerger().merge(newArrayList("src/test/resources/output/fake.osm.pbf", "src/test/resources/output/a0.osm.pbf"), Paths.get("target/output.osm.pbf"));
+        new OsmMerger().merge(
+                newArrayList("src/test/resources/output/fake.osm.pbf", "src/test/resources/output/a0.osm.pbf"),
+                Paths.get("target/output.osm.pbf"));
 
         assertTrue(Files.equal(new File("target/output.osm.pbf"), new File("src/test/resources/output/a0.osm.pbf")));
     }

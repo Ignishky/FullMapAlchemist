@@ -3,8 +3,9 @@ package fr.ignishky.fma.generator.helper;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.Integer.parseInt;
 
-public class Layers {
+public final class Layers {
 
     private Layers() {
     }
@@ -24,7 +25,7 @@ public class Layers {
 
     public static int layer(String input) {
         if (input != null) {
-            Integer level = Integer.valueOf(input);
+            int level = parseInt(input);
             if (level == 0) {
                 return 0;
             }

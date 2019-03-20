@@ -11,6 +11,7 @@ public class Families {
 
     @Value
     public static class Family {
+
         String abbreviation;
         String location;
     }

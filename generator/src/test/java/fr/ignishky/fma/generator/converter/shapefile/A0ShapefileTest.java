@@ -33,12 +33,12 @@ class A0ShapefileTest {
     private final A0Shapefile a0Shapefile = new A0Shapefile(new File("src/test/resources/input"), nameProvider, new File("target/generator"));
 
     @Test
-    public void should_throw_IllegalStateException_when_a0_shapefile_missing_in_ax_folder() {
+    void should_throw_IllegalStateException_when_a0_shapefile_missing_in_ax_folder() {
         assertThrows(IllegalStateException.class, () -> a0Shapefile.convert("and", "ax", capitalProvider));
     }
 
     @Test
-    public void should_convert_a0_shapefile_to_OSM_format() {
+    void should_convert_a0_shapefile_to_OSM_format() {
         when(nameProvider.getAlternateNames(anyLong())).thenReturn(ImmutableMap.of("name:fr", "Luxembourg"));
         when(capitalProvider.get(0)).thenReturn(singletonList(new Centroid()
                 .withName("Luxembourg")
@@ -66,7 +66,7 @@ class A0ShapefileTest {
         assertThat(members.stream().map(RelationMember::getMemberRole)).containsOnly("label", "outer", "admin_centre");
     }
 
-    private void assertTag(Collection<Tag> tags, String key, String value) {
+    private static void assertTag(Collection<Tag> tags, String key, String value) {
         assertThat(tags.stream().filter(tag -> key.equals(tag.getKey())).map(Tag::getValue)).containsOnly(value);
     }
 }

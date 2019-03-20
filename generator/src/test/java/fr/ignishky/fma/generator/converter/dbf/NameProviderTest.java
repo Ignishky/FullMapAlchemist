@@ -6,13 +6,12 @@ import java.io.File;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+ class NameProviderTest {
 
-public class NameProviderTest {
-
-    private NameProvider nameProvider = new NameProvider();
+    private final NameProvider nameProvider = new NameProvider();
 
     @Test
-    public void should_add_alternative_names() {
+    void should_add_alternative_names() {
         nameProvider.loadAlternateNames(new File("src/test/resources/input/and/and/andand___________an.dbf"));
         Map<String, String> tags = nameProvider.getAlternateNames(10200000000008L);
         assertThat(tags).hasSize(6);

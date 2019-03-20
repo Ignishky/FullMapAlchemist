@@ -16,6 +16,11 @@ import java.io.InputStream;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.VERSION;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
+
 @Slf4j
 public class ReleaseDownloader implements Function<Product, Stream<Release>> {
 
@@ -24,7 +29,7 @@ public class ReleaseDownloader implements Function<Product, Stream<Release>> {
     private final String token;
 
     @Inject
-    public ReleaseDownloader(@Named("version") String version, HttpClient client, @Named("token") String token) {
+    ReleaseDownloader(@Named(VERSION) String version, HttpClient client, @Named(TOKEN) String token) {
         this.version = version;
         this.client = client;
         this.token = token;
@@ -33,18 +38,19 @@ public class ReleaseDownloader implements Function<Product, Stream<Release>> {
     @Override
     public Stream<Release> apply(Product product) {
         String releaseUrl = product.getLocation() + "/releases";
-        log.info("Get release {} from {} ({})", version, product.getName(), releaseUrl);
+        String name = product.getName();
+        log.info("Get release {} from {} ({})", version, name, releaseUrl);
 
         HttpGet get = new HttpGet(releaseUrl);
-        get.addHeader("Authorization", token);
+        get.addHeader(AUTHORIZATION, token);
 
         try (InputStream response = client.execute(get).getEntity().getContent()) {
 
-            return new Gson().fromJson(IOUtils.toString(response, "UTF-8"), Releases.class).getContent().stream() //
+            return new Gson().fromJson(IOUtils.toString(response, UTF_8), Releases.class).getContent().stream() //
                     .filter(release -> version.equals(release.getVersion()));
 
         } catch (IOException e) {
-            throw new IllegalStateException("Something goes wrong while processing " + product.getName(), e);
+            throw new IllegalStateException("Something goes wrong while downloading release " + name, e);
         }
     }
 }

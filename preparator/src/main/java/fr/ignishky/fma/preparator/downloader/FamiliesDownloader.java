@@ -15,20 +15,22 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 public class FamiliesDownloader {
 
-    private static final String FAMILIES_URL = "https://api.tomtom.com/mcapi/families";
+    public static final String FAMILIES_URL = "https://api.tomtom.com/mcapi/families";
     private static final List<String> ALLOWED = singletonList("MN");
 
     private final HttpClient client;
     private final String token;
 
     @Inject
-    public FamiliesDownloader(HttpClient client, @Named("token") String token) {
+    FamiliesDownloader(HttpClient client, @Named(TOKEN) String token) {
         this.client = client;
         this.token = token;
     }
@@ -37,15 +39,15 @@ public class FamiliesDownloader {
         log.info("Get all families ({})", FAMILIES_URL);
 
         HttpGet get = new HttpGet(FAMILIES_URL);
-        get.addHeader("Authorization", token);
+        get.addHeader(AUTHORIZATION, token);
 
         try (InputStream response = client.execute(get).getEntity().getContent()) {
 
             return new Gson().fromJson(IOUtils.toString(response, UTF_8), Families.class).getContent().stream() //
-                    .filter(f -> ALLOWED.contains(f.getAbbreviation()));
+                    .filter(family -> ALLOWED.contains(family.getAbbreviation()));
 
         } catch (IOException e) {
-            throw new IllegalStateException("Something goes wrong while processing families", e);
+            throw new IllegalStateException("Something goes wrong while downloading families", e);
         }
     }
 }

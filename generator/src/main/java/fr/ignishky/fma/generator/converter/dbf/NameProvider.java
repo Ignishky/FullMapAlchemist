@@ -39,10 +39,10 @@ public class NameProvider {
         return ofNullable(alternateNames.get(tomtomId))
                 .orElse(ImmutableList.of())
                 .stream()
-                .collect(toMap(this::getKeyAlternativeName, AlternativeName::getName, (key1, key2) -> key2));
+                .collect(toMap(NameProvider::getKeyAlternativeName, AlternativeName::getName, (key1, key2) -> key2));
     }
 
-    private String getKeyAlternativeName(AlternativeName alternativeName) {
+    private static String getKeyAlternativeName(AlternativeName alternativeName) {
         String keyPrefix = "ON".equals(alternativeName.getType()) ? "name:" : "alt_name:";
         return ofNullable(Enums.getIfPresent(Language.class, alternativeName.getLanguage()).orNull())
                 .map(language -> keyPrefix + language.getValue())

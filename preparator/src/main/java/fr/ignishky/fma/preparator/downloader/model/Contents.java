@@ -13,6 +13,7 @@ public class Contents {
 
     @Value
     public static class Content {
+
         String name;
         String location;
     }

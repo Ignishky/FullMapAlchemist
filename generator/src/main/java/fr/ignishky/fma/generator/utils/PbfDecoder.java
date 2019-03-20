@@ -33,18 +33,18 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
-public class PbfDecoder {
-
-    private PbfDecoder() {}
+public final class PbfDecoder {
 
     private static final int EMPTY_VERSION = -1;
-    private static final Date EMPTY_TIMESTAMP = new Date(0);
-    private static final long EMPTY_CHANGESET = -1;
+    private static final Date EMPTY_TIMESTAMP = new Date(0L);
+    private static final long EMPTY_CHANGE_SET = -1;
+
+    private PbfDecoder() {}
 
     public static List<EntityContainer> decode(PbfRawBlob data) {
         try {
             if (!"OSMData".equals(data.getType())) {
-                return new ArrayList<>();
+                return new ArrayList<>(0);
             }
 
             PrimitiveBlock block = PrimitiveBlock.parseFrom(inflate(data));
@@ -106,8 +106,8 @@ public class PbfDecoder {
         }
     }
 
-    private static CommonEntityData buildCommonEntityData(long entityId, List<Integer> keys, List<Integer> values, Info info,
-            PbfFieldDecoder fieldDecoder) {
+    private static CommonEntityData toCommonEntityData(long entityId, List<Integer> keys, List<Integer> values, Info info,
+                                                       PbfFieldDecoder fieldDecoder) {
         OsmUser user;
 
         // Build the user, but only if one exists.
@@ -125,8 +125,8 @@ public class PbfDecoder {
         return entityData;
     }
 
-    private static CommonEntityData buildCommonEntityData(long entityId, List<Integer> keys, List<Integer> values, PbfFieldDecoder fieldDecoder) {
-        CommonEntityData entityData = new CommonEntityData(entityId, EMPTY_VERSION, EMPTY_TIMESTAMP, OsmUser.NONE, EMPTY_CHANGESET);
+    private static CommonEntityData toCommonEntityData(long entityId, List<Integer> keys, List<Integer> values, PbfFieldDecoder fieldDecoder) {
+        CommonEntityData entityData = new CommonEntityData(entityId, EMPTY_VERSION, EMPTY_TIMESTAMP, OsmUser.NONE, EMPTY_CHANGE_SET);
 
         buildTags(entityData, keys, values, fieldDecoder);
 
@@ -134,16 +134,16 @@ public class PbfDecoder {
     }
 
     private static List<EntityContainer> processNodes(List<Node> nodes, PbfFieldDecoder fieldDecoder) {
-        List<EntityContainer> decodedEntities = new ArrayList<>();
+        List<EntityContainer> decodedEntities = new ArrayList<>(nodes.size());
         for (Node node : nodes) {
             org.openstreetmap.osmosis.core.domain.v0_6.Node osmNode;
             CommonEntityData entityData;
 
             if (node.hasInfo()) {
-                entityData = buildCommonEntityData(node.getId(), node.getKeysList(), node.getValsList(), node.getInfo(), fieldDecoder);
+                entityData = toCommonEntityData(node.getId(), node.getKeysList(), node.getValsList(), node.getInfo(), fieldDecoder);
 
             } else {
-                entityData = buildCommonEntityData(node.getId(), node.getKeysList(), node.getValsList(), fieldDecoder);
+                entityData = toCommonEntityData(node.getId(), node.getKeysList(), node.getValsList(), fieldDecoder);
             }
 
             osmNode = new org.openstreetmap.osmosis.core.domain.v0_6.Node(entityData, fieldDecoder.decodeLatitude(node
@@ -156,7 +156,7 @@ public class PbfDecoder {
     }
 
     private static List<EntityContainer> processNodes(DenseNodes nodes, PbfFieldDecoder fieldDecoder) {
-        List<EntityContainer> decodedEntities = new ArrayList<>();
+        List<EntityContainer> decodedEntities = new ArrayList<>(nodes.getIdCount());
         List<Long> idList = nodes.getIdList();
         List<Long> latList = nodes.getLatList();
         List<Long> lonList = nodes.getLonList();
@@ -203,7 +203,7 @@ public class PbfDecoder {
 
                 entityData = new CommonEntityData(nodeId, denseInfo.getVersion(i), fieldDecoder.decodeTimestamp(timestamp), user, changesetId);
             } else {
-                entityData = new CommonEntityData(nodeId, EMPTY_VERSION, EMPTY_TIMESTAMP, OsmUser.NONE, EMPTY_CHANGESET);
+                entityData = new CommonEntityData(nodeId, EMPTY_VERSION, EMPTY_TIMESTAMP, OsmUser.NONE, EMPTY_CHANGE_SET);
             }
 
             // Build the tags. The key and value string indexes are sequential
@@ -235,15 +235,15 @@ public class PbfDecoder {
     }
 
     private static List<EntityContainer> processWays(List<Way> ways, PbfFieldDecoder fieldDecoder) {
-        List<EntityContainer> decodedEntities = new ArrayList<>();
+        List<EntityContainer> decodedEntities = new ArrayList<>(ways.size());
         for (Way way : ways) {
 
             CommonEntityData entityData;
 
             if (way.hasInfo()) {
-                entityData = buildCommonEntityData(way.getId(), way.getKeysList(), way.getValsList(), way.getInfo(), fieldDecoder);
+                entityData = toCommonEntityData(way.getId(), way.getKeysList(), way.getValsList(), way.getInfo(), fieldDecoder);
             } else {
-                entityData = buildCommonEntityData(way.getId(), way.getKeysList(), way.getValsList(), fieldDecoder);
+                entityData = toCommonEntityData(way.getId(), way.getKeysList(), way.getValsList(), fieldDecoder);
             }
 
             org.openstreetmap.osmosis.core.domain.v0_6.Way osmWay = new org.openstreetmap.osmosis.core.domain.v0_6.Way(entityData);
@@ -251,7 +251,7 @@ public class PbfDecoder {
             // Build up the list of way nodes for the way. The node ids are
             // delta encoded meaning that each id is stored as a delta against
             // the previous one.
-            long nodeId = 0;
+            long nodeId = 0L;
             List<WayNode> wayNodes = osmWay.getWayNodes();
             for (long nodeIdOffset : way.getRefsList()) {
                 nodeId += nodeIdOffset;
@@ -279,7 +279,7 @@ public class PbfDecoder {
         // Build up the list of relation members for the way. The member ids are
         // delta encoded meaning that each id is stored as a delta against
         // the previous one.
-        long memberId = 0;
+        long memberId = 0L;
         while (memberIdIterator.hasNext()) {
             MemberType memberType = memberTypeIterator.next();
             memberId += memberIdIterator.next();
@@ -300,15 +300,15 @@ public class PbfDecoder {
     }
 
     private static List<EntityContainer> processRelations(List<Relation> relations, PbfFieldDecoder fieldDecoder) {
-        List<EntityContainer> decodedEntities = new ArrayList<>();
+        List<EntityContainer> decodedEntities = new ArrayList<>(relations.size());
 
         for (Relation relation : relations) {
             CommonEntityData entityData;
 
             if (relation.hasInfo()) {
-                entityData = buildCommonEntityData(relation.getId(), relation.getKeysList(), relation.getValsList(), relation.getInfo(), fieldDecoder);
+                entityData = toCommonEntityData(relation.getId(), relation.getKeysList(), relation.getValsList(), relation.getInfo(), fieldDecoder);
             } else {
-                entityData = buildCommonEntityData(relation.getId(), relation.getKeysList(), relation.getValsList(), fieldDecoder);
+                entityData = toCommonEntityData(relation.getId(), relation.getKeysList(), relation.getValsList(), fieldDecoder);
             }
 
             org.openstreetmap.osmosis.core.domain.v0_6.Relation osmRelation = new org.openstreetmap.osmosis.core.domain.v0_6.Relation(entityData);
