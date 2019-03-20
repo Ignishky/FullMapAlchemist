@@ -1,4 +1,4 @@
-package fr.ignishky.fma.preparator.downloader.utils;
+package fr.ignishky.fma.preparator.utils;
 
 import java.util.regex.Pattern;
 

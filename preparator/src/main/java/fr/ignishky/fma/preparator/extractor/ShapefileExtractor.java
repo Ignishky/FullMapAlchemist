@@ -15,9 +15,9 @@ import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
 
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.OUTPUT_FOLDER;
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.PATTERN_7ZIP_FILE;
 import static fr.ignishky.fma.preparator.extractor.TomtomFile.allFilesFrom;
+import static fr.ignishky.fma.preparator.utils.Constants.OUTPUT_FOLDER;
+import static fr.ignishky.fma.preparator.utils.Constants.PATTERN_7ZIP_FILE;
 import static java.nio.file.Files.delete;
 
 @Slf4j

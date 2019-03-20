@@ -18,8 +18,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.PATTERN_7ZIP_FILE;
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
+import static fr.ignishky.fma.preparator.utils.Constants.PATTERN_7ZIP_FILE;
+import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;

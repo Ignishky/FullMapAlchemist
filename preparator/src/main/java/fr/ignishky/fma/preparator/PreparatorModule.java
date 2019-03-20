@@ -6,9 +6,9 @@ import org.apache.http.client.HttpClient;
 import java.io.File;
 
 import static com.google.inject.name.Names.named;
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.OUTPUT_FOLDER;
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.VERSION;
+import static fr.ignishky.fma.preparator.utils.Constants.OUTPUT_FOLDER;
+import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
+import static fr.ignishky.fma.preparator.utils.Constants.VERSION;
 import static org.apache.http.impl.NoConnectionReuseStrategy.INSTANCE;
 import static org.apache.http.impl.client.HttpClientBuilder.create;
 

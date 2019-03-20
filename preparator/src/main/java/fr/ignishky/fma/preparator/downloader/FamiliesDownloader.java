@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
+import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;

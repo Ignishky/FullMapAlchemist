@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
+import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;

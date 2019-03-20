@@ -16,8 +16,8 @@ import java.io.InputStream;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.VERSION;
+import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
+import static fr.ignishky.fma.preparator.utils.Constants.VERSION;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 

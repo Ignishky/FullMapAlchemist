@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.OUTPUT_FOLDER;
-import static fr.ignishky.fma.preparator.downloader.utils.Constants.TOKEN;
+import static fr.ignishky.fma.preparator.utils.Constants.OUTPUT_FOLDER;
+import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
