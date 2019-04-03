@@ -1,6 +1,7 @@
 package fr.ignishky.fma.generator.merger;
 
 import com.google.common.io.Files;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -8,27 +9,33 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class OsmMergerTest {
 
-    @Test
-    void should_copy_the_only_input_file() throws IOException {
-        new File("target/output.osm.pbf").delete();
+    private static final String PRODUCT_PDF = "src/test/resources/output/a0.osm.pbf";
+    private static final String OUTPUT_PBF = "target/output.osm.pbf";
 
-        new OsmMerger().merge(newArrayList("src/test/resources/output/a0.osm.pbf"), Paths.get("target/output.osm.pbf"));
+    private final OsmMerger osmMerger = new OsmMerger();
 
-        assertTrue(Files.equal(new File("target/output.osm.pbf"), new File("src/test/resources/output/a0.osm.pbf")));
+    @BeforeEach
+    void clean() {
+        new File(OUTPUT_PBF).delete();
     }
 
     @Test
-    void should_ignore_non_existing_file() throws IOException {
-        new File("target/output.osm.pbf").delete();
+    void should_copy_the_only_input_file() throws IOException {
 
-        new OsmMerger().merge(
-                newArrayList("src/test/resources/output/fake.osm.pbf", "src/test/resources/output/a0.osm.pbf"),
-                Paths.get("target/output.osm.pbf"));
+        osmMerger.merge(newArrayList(PRODUCT_PDF), Paths.get(OUTPUT_PBF));
 
-        assertTrue(Files.equal(new File("target/output.osm.pbf"), new File("src/test/resources/output/a0.osm.pbf")));
+        assertThat(Files.equal(new File(OUTPUT_PBF), new File(PRODUCT_PDF))).isTrue();
+    }
+
+    @Test
+    void should_merge_all_input_files() throws IOException {
+
+        osmMerger.merge(newArrayList("src/test/resources/output/bel.osm.pbf", "src/test/resources/output/lux.osm.pbf", "src/test/resources/output/nld.osm.pbf"), Paths.get(OUTPUT_PBF));
+
+        assertThat(Files.equal(new File(OUTPUT_PBF), new File("src/test/resources/output/merged.osm.pbf"))).isTrue();
     }
 }

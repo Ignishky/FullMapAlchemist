@@ -1,6 +1,7 @@
 package fr.ignishky.fma.generator;
 
 import com.google.inject.AbstractModule;
+import fr.ignishky.fma.generator.utils.Constants;
 
 import java.io.File;
 
@@ -19,7 +20,7 @@ public class GeneratorModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(File.class).annotatedWith(named("inputFolder")).toInstance(inputFolder);
-        bind(File.class).annotatedWith(named("outputFolder")).toInstance(outputFolder);
+        bind(File.class).annotatedWith(named(Constants.INPUT_FOLDER)).toInstance(inputFolder);
+        bind(File.class).annotatedWith(named(Constants.OUTPUT_FOLDER)).toInstance(outputFolder);
     }
 }

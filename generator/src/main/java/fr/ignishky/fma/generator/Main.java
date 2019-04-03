@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.inject.Guice.createInjector;
+import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
+import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -21,15 +23,14 @@ public class Main {
 
     private final File inputFolder;
     private final File outputFolder;
-    private final CountryConverter countryConverter;
+    private final CountryConverter country;
     private final OsmMerger osmMerger;
 
     @Inject
-    public Main(@Named("inputFolder") File inputFolder, @Named("outputFolder") File outputFolder, CountryConverter countryConverter,
-                OsmMerger osmMerger) {
+    Main(@Named(INPUT_FOLDER) File inputFolder, @Named(OUTPUT_FOLDER) File outputFolder, CountryConverter country, OsmMerger osmMerger) {
         this.inputFolder = inputFolder;
         this.outputFolder = outputFolder;
-        this.countryConverter = countryConverter;
+        this.country = country;
         this.osmMerger = osmMerger;
     }
 
@@ -40,17 +41,17 @@ public class Main {
         createInjector(new GeneratorModule(args[0], args[1])).getInstance(Main.class).run();
     }
 
-    /* package */ void run() {
+    void run() {
         String[] countries = inputFolder.list();
 
-        if (countries == null) {
-            throw new IllegalArgumentException("<inputFolder> must be a valid directory.");
+        if (countries == null || countries.length == 0) {
+            throw new IllegalArgumentException("<inputFolder> must be a valid non-empty directory.");
         }
 
         log.info("Generating OSM file with countries : {}", Arrays.toString(countries));
 
-        List<String> convertedCountryFiles = Stream.of(countries).map(countryConverter::generate).collect(toList());
+        List<String> convertedCountries = Stream.of(countries).map(country::convert).collect(toList());
 
-        osmMerger.merge(convertedCountryFiles, Paths.get(outputFolder.getPath(), "Europe.osm.pbf"));
+        osmMerger.merge(convertedCountries, Paths.get(outputFolder.getPath(), "Europe.osm.pbf"));
     }
 }

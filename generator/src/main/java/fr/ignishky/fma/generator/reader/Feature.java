@@ -6,11 +6,15 @@ import com.vividsolutions.jts.geom.Point;
 
 public interface Feature {
 
-    String getString(String attr);
+    public enum Attribute {
+        ID, NAME, POSTCODE, ADMINCLASS, CITYTYP, DISPCLASS
+    }
 
-    Long getLong(String attr);
+    String getString(Attribute attr);
 
-    Integer getInteger(String attr);
+    Long getLong(Attribute attr);
+
+    int getInt(Attribute attr);
 
     Point getPoint();
 

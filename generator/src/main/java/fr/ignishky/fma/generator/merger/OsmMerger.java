@@ -19,28 +19,29 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class OsmMerger {
 
-    public void merge(List<String> inputFiles, Path outputFile) {
+    public void merge(List<String> inputs, Path outputFile) {
 
-        List<File> files = inputFiles.stream().map(File::new).filter(File::exists).collect(toList());
-
-        if (files.size() == 1) {
+        if (inputs.size() == 1) {
             try {
-                copy(files.get(0), outputFile.toFile());
+                log.info("Copy {} to {}", inputs.get(0), outputFile);
+                copy(new File(inputs.get(0)), outputFile.toFile());
+
             } catch (IOException e) {
-                throw new IllegalStateException(format("Unable to copy file '%s' to '%s'", inputFiles.get(0), outputFile), e);
+                throw new IllegalStateException(format("Unable to copy file '%s' to '%s'", inputs.get(0), outputFile), e);
             }
 
-        } else if (files.size() > 1) {
-            PbfIterator[] iterators = inputFiles.stream().map(PbfIterator::new).collect(toList()).toArray(new PbfIterator[] {});
-            Iterator<EntityContainer> merge = MergingOsmPbfIterator.merge(iterators);
+        } else if (inputs.size() > 1) {
+            log.info("Merging {} to {}", inputs, outputFile);
+            List<Iterator<EntityContainer>> iterators = inputs.stream().map(PbfIterator::new).collect(toList());
+            Iterator<EntityContainer> merge = MergingOsmPbfIterator.init(iterators);
 
-            log.info("Writing merged data to {}", outputFile);
             try (FileOutputStream output = new FileOutputStream(outputFile.toFile())) {
                 OsmosisSerializer serializer = new OsmosisSerializer(new BlockOutputStream(output));
                 while (merge.hasNext()) {
                     serializer.process(merge.next());
                 }
                 serializer.complete();
+
             } catch (IOException e) {
                 throw new IllegalStateException(format("Unable to open file '%s'", outputFile), e);
             }

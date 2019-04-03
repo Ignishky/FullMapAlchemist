@@ -13,17 +13,17 @@ public class ShapefileFeature implements Feature {
 
     private final SimpleFeature feature;
 
-    public String getString(String attr) {
-        String attribute = (String) feature.getAttribute(attr);
+    public String getString(Attribute attr) {
+        String attribute = (String) feature.getAttribute(attr.name());
         return isBlank(attribute) ? null : attribute;
     }
 
-    public Long getLong(String attr) {
-        return (Long) feature.getAttribute(attr);
+    public Long getLong(Attribute attr) {
+        return (Long) feature.getAttribute(attr.name());
     }
 
-    public Integer getInteger(String attr) {
-        return (Integer) feature.getAttribute(attr);
+    public int getInt(Attribute attr) {
+        return (int) feature.getAttribute(attr.name());
     }
 
     public Point getPoint() {

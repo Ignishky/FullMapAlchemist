@@ -3,6 +3,7 @@ package fr.ignishky.fma.generator.helper;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
+import static fr.ignishky.fma.generator.utils.Constants.TAG_LAYER;
 import static java.lang.Integer.parseInt;
 
 public final class Layers {
@@ -18,7 +19,7 @@ public final class Layers {
                 return layer(tags.get("layer:to"));
             }
         } else {
-            return layer(tags.get("layer"));
+            return layer(tags.get(TAG_LAYER));
         }
         return 0;
     }

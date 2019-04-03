@@ -17,18 +17,20 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 
+import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.IntStream;
 
-import static com.google.common.base.Preconditions.checkState;
 import static fr.ignishky.fma.generator.helper.Geohash.encodeGeohash;
 import static fr.ignishky.fma.generator.helper.Layers.layer;
+import static fr.ignishky.fma.generator.utils.Constants.TAG_LAYER;
 import static java.time.Instant.now;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -39,22 +41,22 @@ import static org.openstreetmap.osmosis.core.domain.v0_6.EntityType.Way;
 @Slf4j
 public class OsmosisSerializer implements GeometrySerializer {
 
-    private final Date date;
+    private final Instant date;
     private final Sink sink;
     private final OsmUser user;
-    private final Set<Long> pointTracker = new HashSet<>();
-    private final Set<Long> wayTracker = new HashSet<>();
-    private final Set<Long> relationTracker = new HashSet<>();
+    private final Collection<Long> pointTracker = new HashSet<>(10);
+    private final Collection<Long> wayTracker = new HashSet<>(10);
+    private final Collection<Long> relationTracker = new HashSet<>(10);
 
-    public OsmosisSerializer(Sink sink) {
-        this.sink = sink;
-        date = Date.from(now());
+    public OsmosisSerializer(Path path) {
+        sink = new PbfSink(path);
+        date = now();
         user = new OsmUser(1, "Tomtom");
     }
 
     @Override
-    public Optional<Node> writePoint(Point point, Map<String, String> tags) {
-        long id = encodeGeohash(0, point);
+    public Optional<Long> write(Point point, Map<String, String> tags) {
+        long id = encodeGeohash(0, point.getCoordinate());
 
         if (pointTracker.contains(id)) {
             log.warn("Rejecting point {} with tags {} because already present.", id, tags);
@@ -62,41 +64,54 @@ public class OsmosisSerializer implements GeometrySerializer {
         }
 
         pointTracker.add(id);
-        Node node = new Node(ced(id, tags), point.getY(), point.getX());
-        sink.process(new NodeContainer(node));
+        sink.process(new NodeContainer(new Node(ced(id, tags), point.getY(), point.getX())));
 
-        return of(node);
+        return of(id);
     }
 
     @Override
-    public Optional<Long> writeBoundary(LineString line, Map<String, String> tags) {
-        long id = encodeGeohash(7, line.getCentroid());
+    public Optional<Long> write(LineString line, Map<String, String> tags) {
+        long id = encodeGeohash(7, line.getCentroid().getCoordinate());
 
         if (!wayTracker.contains(id)) {
             wayTracker.add(id);
-            Way way = new Way(ced(id, tags), getWayNodes(line, tags));
-            sink.process(new WayContainer(way));
+            sink.process(new WayContainer(new Way(ced(id, tags), getLineNodes(line, tags))));
         }
 
         return of(id);
     }
 
-    private CommonEntityData ced(long id, Map<String, String> tags) {
-        return new CommonEntityData(id, 1, date, user, 1L, tags.entrySet().stream().map(en -> new Tag(en.getKey(), en.getValue())).collect(toList()));
+    @Override
+    public void write(List<RelationMember> members, Map<String, String> tags) {
+        members.stream()
+                .filter(member -> isUnknownNode(member) || isUnknownWay(member))
+                .findFirst()
+                .ifPresent(member -> {
+                    throw new IllegalStateException("Could not add relation with missing member " + member.getMemberId());
+                });
+
+        long id = relationId(members.get(0).getMemberId(), layer(tags.get(TAG_LAYER)));
+        sink.process(new RelationContainer(new Relation(ced(id, tags), members)));
     }
 
-    private List<WayNode> getWayNodes(LineString line, Map<String, String> tags) {
+    @Override
+    public void close() {
+        sink.complete();
+        sink.release();
+    }
+
+    private CommonEntityData ced(long id, Map<String, String> tags) {
+        return new CommonEntityData(id, 1, Date.from(date), user, 1L,
+                tags.entrySet().stream().map(en -> new Tag(en.getKey(), en.getValue())).collect(toList()));
+    }
+
+    private List<WayNode> getLineNodes(LineString line, Map<String, String> tags) {
         Coordinate[] coordinates = line.getCoordinates();
         List<WayNode> wayNodes = new ArrayList<>(coordinates.length + 1);
         IntStream.range(0, coordinates.length).forEach(i -> {
-            Coordinate coordinate = coordinates[i];
-            boolean start = i == 0;
-            boolean end = i == coordinates.length - 1;
-            int layer = getLayer(tags, coordinate, start, end);
-            long id = writePointAndGetId(layer, coordinate);
-            int size = wayNodes.size();
-            if (size == 0 || wayNodes.get(size - 1).getNodeId() != id) {
-                wayNodes.add(new WayNode(id));
+            int layer = getLayer(tags, coordinates[i], i == 0, i == coordinates.length - 1);
+            if (wayNodes.isEmpty() || wayNodes.get(wayNodes.size() - 1).getNodeId() != writePointAndGetId(layer, coordinates[i])) {
+                wayNodes.add(new WayNode(writePointAndGetId(layer, coordinates[i])));
             }
         });
         return wayNodes;
@@ -105,53 +120,20 @@ public class OsmosisSerializer implements GeometrySerializer {
     private int getLayer(Map<String, String> tags, Coordinate coordinate, boolean start, boolean end) {
         int layer = layer(tags, start, end);
         if ("ferry".equals(tags.get("route")) && !start && !end) {
-            while (exists(layer, coordinate)) {
+            while (pointTracker.contains(encodeGeohash(layer, coordinate))) {
                 layer++;
             }
         }
         return layer;
     }
 
-    private boolean exists(int layer, Coordinate coordinate) {
-        return pointTracker.contains(encodeGeohash(layer, coordinate.x, coordinate.y));
-    }
-
     private long writePointAndGetId(int layer, Coordinate coordinate) {
-        long id = encodeGeohash(layer, coordinate.x, coordinate.y);
+        long id = encodeGeohash(layer, coordinate);
         if (!pointTracker.contains(id)) {
             pointTracker.add(id);
-            sink.process(new NodeContainer(new Node(new CommonEntityData(id, 1, date, user, 1L), coordinate.y, coordinate.x)));
+            sink.process(new NodeContainer(new Node(new CommonEntityData(id, 1, Date.from(date), user, 1L), coordinate.y, coordinate.x)));
         }
         return id;
-    }
-
-
-
-
-
-
-
-
-    @Override
-    public void write(List<RelationMember> members, Map<String, String> tags) {
-        for (RelationMember member : members) {
-            if (member.getMemberType() == Node) {
-                checkState(pointTracker.contains(member.getMemberId()), "Adding relation on missing node");
-            } else if (member.getMemberType() == Way) {
-                checkState(wayTracker.contains(member.getMemberId()), "Adding relation on missing way");
-            }
-        }
-
-        int layer = layer(tags.get("layer"));
-
-        long id = relationId(members.get(0).getMemberId(), layer);
-        sink.process(new RelationContainer(new Relation(ced(id, tags), members)));
-    }
-
-    @Override
-    public void close() {
-        sink.complete();
-        sink.release();
     }
 
     private long relationId(long memberId, int layer) {
@@ -162,5 +144,13 @@ public class OsmosisSerializer implements GeometrySerializer {
         }
         relationTracker.add(id);
         return id;
+    }
+
+    private boolean isUnknownNode(RelationMember member) {
+        return member.getMemberType() == Node && !pointTracker.contains(member.getMemberId());
+    }
+
+    private boolean isUnknownWay(RelationMember member) {
+        return member.getMemberType() == Way && !wayTracker.contains(member.getMemberId());
     }
 }

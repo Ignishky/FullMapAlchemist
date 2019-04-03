@@ -1,4 +1,4 @@
-package fr.ignishky.fma.generator.utils;
+package fr.ignishky.fma.generator.merger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.openstreetmap.osmosis.core.OsmosisRuntimeException;
@@ -33,59 +33,62 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
-public final class PbfDecoder {
+import static java.util.Collections.EMPTY_LIST;
+
+final class PbfDecoder {
 
     private static final int EMPTY_VERSION = -1;
     private static final Date EMPTY_TIMESTAMP = new Date(0L);
     private static final long EMPTY_CHANGE_SET = -1;
 
-    private PbfDecoder() {}
+    private PbfDecoder() {
+    }
 
-    public static List<EntityContainer> decode(PbfRawBlob data) {
+    static List<EntityContainer> decode(PbfRawBlob data) {
+        if (!"OSMData".equals(data.getType())) {
+            return EMPTY_LIST;
+        }
+
+        PrimitiveBlock block = inflate(data);
+        PbfFieldDecoder fieldDecoder = new PbfFieldDecoder(block);
+
+        List<EntityContainer> decodedEntities = new ArrayList<>();
+        for (PrimitiveGroup primitiveGroup : block.getPrimitivegroupList()) {
+            decodedEntities.addAll(processNodes(primitiveGroup.getDense(), fieldDecoder));
+            decodedEntities.addAll(processNodes(primitiveGroup.getNodesList(), fieldDecoder));
+            decodedEntities.addAll(processWays(primitiveGroup.getWaysList(), fieldDecoder));
+            decodedEntities.addAll(processRelations(primitiveGroup.getRelationsList(), fieldDecoder));
+        }
+        return decodedEntities;
+    }
+
+    private static PrimitiveBlock inflate(PbfRawBlob rawBlob) {
         try {
-            if (!"OSMData".equals(data.getType())) {
-                return new ArrayList<>(0);
-            }
+            Blob blob = Blob.parseFrom(rawBlob.getData());
+            byte[] blobData;
+            if (blob.hasRaw()) {
+                blobData = blob.getRaw().toByteArray();
+            } else if (blob.hasZlibData()) {
+                Inflater inflater = new Inflater();
+                inflater.setInput(blob.getZlibData().toByteArray());
+                blobData = new byte[blob.getRawSize()];
+                try {
+                    inflater.inflate(blobData);
+                } catch (DataFormatException e) {
+                    throw new OsmosisRuntimeException("Unable to decompress PBF blob.", e);
+                }
 
-            PrimitiveBlock block = PrimitiveBlock.parseFrom(inflate(data));
-            PbfFieldDecoder fieldDecoder = new PbfFieldDecoder(block);
-
-            List<EntityContainer> decodedEntities = new ArrayList<>();
-            for (PrimitiveGroup primitiveGroup : block.getPrimitivegroupList()) {
-                decodedEntities.addAll(processNodes(primitiveGroup.getDense(), fieldDecoder));
-                decodedEntities.addAll(processNodes(primitiveGroup.getNodesList(), fieldDecoder));
-                decodedEntities.addAll(processWays(primitiveGroup.getWaysList(), fieldDecoder));
-                decodedEntities.addAll(processRelations(primitiveGroup.getRelationsList(), fieldDecoder));
+                if (!inflater.finished()) {
+                    throw new OsmosisRuntimeException("PBF blob contains incomplete compressed data.");
+                }
+            } else {
+                throw new OsmosisRuntimeException("PBF blob uses unsupported compression, only raw or zlib may be used.");
             }
-            return decodedEntities;
+            return PrimitiveBlock.parseFrom(blobData);
 
         } catch (InvalidProtocolBufferException e) {
             throw new IllegalArgumentException(e);
         }
-    }
-
-    private static byte[] inflate(PbfRawBlob rawBlob) throws InvalidProtocolBufferException {
-        Blob blob = Blob.parseFrom(rawBlob.getData());
-        byte[] blobData;
-        if (blob.hasRaw()) {
-            blobData = blob.getRaw().toByteArray();
-        } else if (blob.hasZlibData()) {
-            Inflater inflater = new Inflater();
-            inflater.setInput(blob.getZlibData().toByteArray());
-            blobData = new byte[blob.getRawSize()];
-            try {
-                inflater.inflate(blobData);
-            } catch (DataFormatException e) {
-                throw new OsmosisRuntimeException("Unable to decompress PBF blob.", e);
-            }
-
-            if (!inflater.finished()) {
-                throw new OsmosisRuntimeException("PBF blob contains incomplete compressed data.");
-            }
-        } else {
-            throw new OsmosisRuntimeException("PBF blob uses unsupported compression, only raw or zlib may be used.");
-        }
-        return blobData;
     }
 
     private static void buildTags(CommonEntityData entityData, List<Integer> keys, List<Integer> values, PbfFieldDecoder fieldDecoder) {
@@ -264,7 +267,7 @@ public final class PbfDecoder {
     }
 
     private static void buildRelationMembers(org.openstreetmap.osmosis.core.domain.v0_6.Relation relation,
-            List<Long> memberIds, List<Integer> memberRoles, List<MemberType> memberTypes, PbfFieldDecoder fieldDecoder) {
+                                             List<Long> memberIds, List<Integer> memberRoles, List<MemberType> memberTypes, PbfFieldDecoder fieldDecoder) {
 
         // Ensure parallel lists are of equal size.
         if (memberIds.size() != memberRoles.size() || memberIds.size() != memberTypes.size()) {

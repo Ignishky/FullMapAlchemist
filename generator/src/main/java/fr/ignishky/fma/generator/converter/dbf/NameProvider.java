@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jamel.dbf.DbfReader;
 import org.jamel.dbf.structure.DbfRow;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +18,12 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 public class NameProvider {
 
-    private final Map<Long, List<AlternativeName>> alternateNames = new HashMap<>();
+    private final Map<Long, List<AlternativeName>> alternateNames = new HashMap<>(10);
 
-    public void loadAlternateNames(File file) {
-        log.info("Reading {}", file);
+    public void loadAlternateNames(Path path) {
+        log.info("Reading {}", path);
 
-        try (DbfReader reader = new DbfReader(file)) {
+        try (DbfReader reader = new DbfReader(path.toFile())) {
             DbfRow row;
 
             while ((row = reader.nextRow()) != null) {

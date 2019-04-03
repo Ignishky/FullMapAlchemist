@@ -1,6 +1,6 @@
 package fr.ignishky.fma.generator.helper;
 
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Coordinate;
 
 import static com.github.davidmoten.geo.GeoHash.encodeHash;
 import static com.google.common.base.Preconditions.checkState;
@@ -16,16 +16,12 @@ public final class Geohash {
     // GeoHashUtils.stringEncode() returns 11 letters.
     // decode() encode letters to long with 5 bit per letter.
     // A geohash takes 55 bits, we use 3 bits to encode the layer
-    public static long encodeGeohash(int layer, double x, double y) {
-        String stringEncode = encodeHash(y, x, 11);
+    public static long encodeGeohash(int layer, Coordinate coordinate) {
+        String stringEncode = encodeHash(coordinate.y, coordinate.x, 11);
         long decode = encodeString(stringEncode);
         checkState(layer >= 0 && layer < 8);
         long mask = (long) layer << 55;
         return decode | mask;
-    }
-
-    public static long encodeGeohash(int layer, Point point) {
-        return encodeGeohash(layer, point.getX(), point.getY());
     }
 
     private static long encodeString(String s) {

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -11,11 +12,20 @@ public class MergingOsmPbfIterator implements Iterator<EntityContainer> {
 
     private final Iterator<EntityContainer> it1;
     private final Iterator<EntityContainer> it2;
+
     private EntityMergeResult next = new EntityMergeResult();
 
-    public MergingOsmPbfIterator(Iterator<EntityContainer> it1, Iterator<EntityContainer> it2) {
+    MergingOsmPbfIterator(Iterator<EntityContainer> it1, Iterator<EntityContainer> it2) {
         this.it1 = it1;
         this.it2 = it2;
+    }
+
+    static Iterator<EntityContainer> init(List<Iterator<EntityContainer>> iterators) {
+        Iterator<EntityContainer> result = iterators.get(0);
+        for (Iterator<EntityContainer> iter : iterators.subList(1, iterators.size())) {
+            result = new MergingOsmPbfIterator(iter, result);
+        }
+        return result;
     }
 
     @Override
@@ -40,15 +50,6 @@ public class MergingOsmPbfIterator implements Iterator<EntityContainer> {
         }
         EntityContainer result = next.getResult();
         next.setResult(null);
-        return result;
-    }
-
-    @SafeVarargs
-    public static Iterator<EntityContainer> merge(Iterator<EntityContainer>... iterators) {
-        Iterator<EntityContainer> result = iterators[0];
-        for (Iterator<EntityContainer> iter : iterators) {
-            if (iter != result) result = new MergingOsmPbfIterator(iter, result);
-        }
         return result;
     }
 }

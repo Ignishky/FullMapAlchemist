@@ -1,4 +1,4 @@
-package fr.ignishky.fma.generator.converter.shapefile;
+package fr.ignishky.fma.generator.converter.product;
 
 import fr.ignishky.fma.generator.converter.dbf.NameProvider;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
@@ -6,7 +6,6 @@ import fr.ignishky.fma.generator.reader.Feature;
 import fr.ignishky.fma.generator.reader.ShapefileIterator;
 import fr.ignishky.fma.generator.writer.GeometrySerializer;
 import fr.ignishky.fma.generator.writer.OsmosisSerializer;
-import fr.ignishky.fma.generator.writer.PbfSink;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -14,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static fr.ignishky.fma.generator.reader.Feature.Attribute.NAME;
 import static java.lang.String.format;
 
 @Slf4j
@@ -23,7 +23,7 @@ public abstract class Shapefile {
     private final File outputFolder;
     protected final NameProvider nameProvider;
 
-    protected Shapefile(File inputFolder, NameProvider nameProvider, File outputFolder) {
+    Shapefile(File inputFolder, NameProvider nameProvider, File outputFolder) {
         this.inputFolder = inputFolder;
         this.nameProvider = nameProvider;
         this.outputFolder = outputFolder;
@@ -31,18 +31,16 @@ public abstract class Shapefile {
 
     public String convert(String countryCode, String zoneCode, CapitalProvider capitalProvider) {
 
-        Path inputShapefile = Paths.get(inputFolder.getPath(), countryCode, zoneCode, getInputFile(countryCode));
-        Path outputZoneFolder = Paths.get(outputFolder.getPath(), countryCode, zoneCode, "products");
-        Path outputZoneFile = outputZoneFolder.resolve(getOutputFileName());
+        nameProvider.loadAlternateNames(Paths.get(inputFolder.getPath(), countryCode, zoneCode, getNameFile(countryCode)));
 
-        nameProvider.loadAlternateNames(Paths.get(inputFolder.getPath(), countryCode, zoneCode, getNameFile(countryCode)).toFile());
+        Path outputZoneFile = getOutputFile(countryCode, zoneCode);
 
-        try (GeometrySerializer serializer = getSerializer(outputZoneFolder);
-             ShapefileIterator iterator = getIterator(inputShapefile)) {
+        try (GeometrySerializer serializer = new OsmosisSerializer(outputZoneFile);
+             ShapefileIterator iterator = getShapefileIterator(countryCode, zoneCode)) {
 
             while (iterator.hasNext()) {
                 Feature next = iterator.next();
-                if (next.getString("NAME") != null) {
+                if (next.getString(NAME) != null) {
                     serialize(serializer, next, capitalProvider);
                 }
             }
@@ -53,22 +51,23 @@ public abstract class Shapefile {
         return outputZoneFile.toString();
     }
 
-    private static ShapefileIterator getIterator(Path inputShapefile) {
+    private Path getOutputFile(String countryCode, String zoneCode) {
+        Path outputZoneFolder = Paths.get(outputFolder.getPath(), countryCode, zoneCode, "products");
+        if(!outputZoneFolder.toFile().exists() && !outputZoneFolder.toFile().mkdirs()) {
+            throw new IllegalStateException("Unable to create folder " + outputZoneFolder);
+        }
+        return outputZoneFolder.resolve(getOutputFileName());
+    }
 
+    private ShapefileIterator getShapefileIterator(String countryCode, String zoneCode) {
+
+        Path inputShapefile = Paths.get(inputFolder.getPath(), countryCode, zoneCode, getInputFile(countryCode));
         if (!inputShapefile.toFile().exists()) {
             throw new IllegalStateException("Missing file " + inputShapefile);
         }
         log.info("Opening {}", inputShapefile);
 
         return new ShapefileIterator(inputShapefile);
-    }
-
-    private OsmosisSerializer getSerializer(Path outputFolder) {
-
-        outputFolder.toFile().mkdirs();
-        Path outputFile = outputFolder.resolve(getOutputFileName());
-
-        return new OsmosisSerializer(new PbfSink(outputFile));
     }
 
     protected abstract String getInputFile(String countryCode);

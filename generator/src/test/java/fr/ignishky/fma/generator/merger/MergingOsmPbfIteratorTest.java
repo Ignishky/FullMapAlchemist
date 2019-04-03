@@ -2,35 +2,32 @@ package fr.ignishky.fma.generator.merger;
 
 import org.junit.jupiter.api.Test;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
+import org.openstreetmap.osmosis.core.domain.common.TimestampContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.Bound;
 import org.openstreetmap.osmosis.core.domain.v0_6.CommonEntityData;
 import org.openstreetmap.osmosis.core.domain.v0_6.Entity;
-import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.OsmUser;
 import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
+import static com.google.common.collect.Iterators.forArray;
 import static com.google.common.collect.Lists.newArrayList;
 import static fr.ignishky.fma.generator.utils.CollectionUtils.streamIterator;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class MergingOsmPbfIteratorTest {
 
     @Test
-    public void should_merge_with_empty_iterator() {
+    void should_merge_with_empty_iterator() {
         List<EntityContainer> newArrayList = newArrayList();
 
         assertThat(new MergingOsmPbfIterator(newArrayList.iterator(), newArrayList(node(1)).iterator()).hasNext()).isTrue();
@@ -38,100 +35,120 @@ class MergingOsmPbfIteratorTest {
     }
 
     @Test
-    public void should_merge_headers() {
-        Iterator<EntityContainer> it1 = newArrayList(header(20170200, new Tag("k1", "v1"))).iterator();
-        Iterator<EntityContainer> it2 = newArrayList(header(20170200, new Tag("k2", "v2"))).iterator();
+    void should_merge_headers() {
+        Tag tag1 = new Tag("k1", "v1");
+        Tag tag2 = new Tag("k2", "v2");
 
-        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(it1, it2);
+        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(forArray(header(tag1)), forArray(header(tag2)));
 
-        assertThat(toMap(merge.next().getEntity().getTags())).containsOnly(entry("k1", "v1"), entry("k2", "v2"));
+        assertThat(merge.hasNext()).isTrue();
+        assertThat(merge.next().getEntity().getTags()).containsOnly(tag1, tag2);
         assertThat(merge.hasNext()).isFalse();
     }
 
     @Test
-    public void should_keep_one_header_and_feed_nodes() {
-        Iterator<EntityContainer> it1 = newArrayList(header(20170200, new Tag("k1", "v1"))).iterator();
-        Iterator<EntityContainer> it2 = newArrayList(node(123L)).iterator();
+    void should_keep_one_header_and_feed_nodes() {
+        EntityContainer header = header(new Tag("k1", "v1"));
+        EntityContainer node = node(123L);
 
-        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(it1, it2);
+        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(forArray(header), forArray(node));
 
-        assertThat(merge.next().getEntity().getType()).isEqualTo(EntityType.Bound);
-        assertThat(merge.next().getEntity().getType()).isEqualTo(EntityType.Node);
+        assertThat(merge.hasNext()).isTrue();
+        assertThat(merge.next()).isEqualTo(header);
+        assertThat(merge.hasNext()).isTrue();
+        assertThat(merge.next()).isEqualTo(node);
         assertThat(merge.hasNext()).isFalse();
     }
 
     @Test
-    public void should_keep_other_header_and_feed_nodes() {
-        Iterator<EntityContainer> it1 = newArrayList(node(123L)).iterator();
-        Iterator<EntityContainer> it2 = newArrayList(header(20170200, new Tag("k1", "v1"))).iterator();
+    void should_keep_other_header_and_feed_nodes() {
+        EntityContainer node = node(123L);
+        EntityContainer header = header(new Tag("k1", "v1"));
 
-        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(it1, it2);
+        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(forArray(node), forArray(header));
 
-        assertThat(merge.next().getEntity().getType()).isEqualTo(EntityType.Bound);
-        assertThat(merge.next().getEntity().getType()).isEqualTo(EntityType.Node);
+        assertThat(merge.hasNext()).isTrue();
+        assertThat(merge.next()).isEqualTo(header);
+        assertThat(merge.hasNext()).isTrue();
+        assertThat(merge.next()).isEqualTo(node);
         assertThat(merge.hasNext()).isFalse();
     }
 
     @Test
-    public void should_order_nodes_by_id() {
-        Iterator<EntityContainer> it1 = newArrayList(node(1L), node(3L), node(5L)).iterator();
-        Iterator<EntityContainer> it2 = newArrayList(node(2L), node(6L)).iterator();
+    void should_order_nodes_by_id() {
+        EntityContainer node1 = node(1L);
+        EntityContainer node2 = node(2L);
+        EntityContainer node3 = node(3L);
+        EntityContainer node5 = node(5L);
+        EntityContainer node6 = node(6L);
 
-        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(it1, it2);
+        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(forArray(node1, node3, node5), forArray(node2, node6));
 
-        assertThat(streamIterator(merge).map(ec -> ec.getEntity().getId()).collect(toList())).containsExactly(1L, 2L, 3L, 5L, 6L);
+        assertThat(streamIterator(merge)).containsExactly(node1, node2, node3, node5, node6);
     }
 
     @Test
-    public void should_order_nodes_before_ways() {
-        Iterator<EntityContainer> it1 = newArrayList(node(1L), way(3L), way(5L)).iterator();
-        Iterator<EntityContainer> it2 = newArrayList(node(2L), node(6L)).iterator();
+    void should_order_nodes_before_ways() {
+        EntityContainer node1 = node(1L);
+        EntityContainer node2 = node(2L);
+        EntityContainer way3 = way(3L);
+        EntityContainer way5 = way(5L);
+        EntityContainer node6 = node(6L);
 
-        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(it1, it2);
+        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(forArray(node1, way3, way5), forArray(node2, node6));
 
-        assertThat(streamIterator(merge).map(ec -> ec.getEntity().getId()).collect(toList())).containsExactly(1L, 2L, 6L, 3L, 5L);
+        assertThat(streamIterator(merge)).containsExactly(node1, node2, node6, way3, way5);
     }
 
     @Test
-    public void should_order_ways_before_relations() {
-        Iterator<EntityContainer> it1 = newArrayList(node(1L), way(3L), way(5L)).iterator();
-        Iterator<EntityContainer> it2 = newArrayList(node(2L), relation(4), relation(6)).iterator();
+    void should_order_ways_before_relations() {
+        EntityContainer node1 = node(1L);
+        EntityContainer node2 = node(2L);
+        EntityContainer way3 = way(3L);
+        EntityContainer relation4 = relation(4);
+        EntityContainer way5 = way(5L);
+        EntityContainer relation6 = relation(6);
 
-        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(it1, it2);
+        Iterator<EntityContainer> merge = new MergingOsmPbfIterator(forArray(node1, way3, way5), forArray(node2, relation4, relation6));
 
-        assertThat(streamIterator(merge).map(ec -> ec.getEntity().getId()).collect(toList())).containsExactly(1L, 2L, 3L, 5L, 4L, 6L);
+        assertThat(streamIterator(merge)).containsExactly(node1, node2, way3, way5, relation4, relation6);
     }
 
     @Test
-    public void should_merge_more_than_2_iterators() {
-        Iterator<EntityContainer> it1 = newArrayList(node(1), way(13), relation(21)).iterator();
-        Iterator<EntityContainer> it2 = newArrayList(node(3), relation(5), relation(22)).iterator();
-        Iterator<EntityContainer> it3 = newArrayList(node(2), node(15), relation(24)).iterator();
-        Iterator<EntityContainer> it4 = newArrayList(node(4), way(6), relation(20)).iterator();
+    void should_merge_more_than_2_iterators() {
+        EntityContainer node1 = node(1);
+        EntityContainer node2 = node(2);
+        EntityContainer node3 = node(3);
+        EntityContainer relation5 = relation(5);
+        EntityContainer way6 = way(6);
+        EntityContainer relation10 = relation(10);
+        EntityContainer way13 = way(13);
+        EntityContainer node15 = node(15);
+        EntityContainer relation21 = relation(21);
+        EntityContainer relation22 = relation(22);
+        Iterator<EntityContainer> it1 = forArray(node1, way13, relation21);
+        Iterator<EntityContainer> it2 = forArray(node3, relation5, relation22);
+        Iterator<EntityContainer> it3 = forArray(node2, node15);
+        Iterator<EntityContainer> it4 = forArray(way6, relation10);
 
-        Iterator<EntityContainer> merge = MergingOsmPbfIterator.merge(it1, it2, it3, it4);
+        Iterator<EntityContainer> merge = MergingOsmPbfIterator.init(newArrayList(it1, it2, it3, it4));
 
-        assertThat(streamIterator(merge).map(ec -> ec.getEntity().getId()).collect(toList()))
-                .containsExactly(1L, 2L, 3L, 4L, 15L, 6L, 13L, 5L, 20L, 21L, 22L, 24L);
+        assertThat(streamIterator(merge)).containsExactly(node1, node2, node3, node15, way6, way13, relation5, relation10, relation21, relation22);
     }
 
     @Test
-    public void should_keep_only_one_node_when_duplicate_ids() {
-        Iterator<EntityContainer> it1 = newArrayList(node(1), node(3)).iterator();
-        Iterator<EntityContainer> it2 = newArrayList(node(3), node(4)).iterator();
-        Iterator<EntityContainer> it3 = newArrayList(node(3), node(4)).iterator();
+    void should_keep_only_one_node_when_duplicate_ids() {
 
-        Iterator<EntityContainer> merge = MergingOsmPbfIterator.merge(it1, it2, it3);
+        EntityContainer node1 = node(1);
+        EntityContainer node3 = node(3);
+        EntityContainer node4 = node(4);
+        Iterator<EntityContainer> merge = MergingOsmPbfIterator.init(newArrayList(forArray(node1, node3), forArray(node3, node4)));
 
-        assertThat(streamIterator(merge).map(ec -> ec.getEntity().getId()).collect(toList())).containsExactly(1L, 3L, 4L);
+        assertThat(streamIterator(merge)).containsExactly(node1, node3, node4);
     }
 
-    private static Map<String, String> toMap(Collection<Tag> tags) {
-        return tags.stream().collect(Collectors.toMap(Tag::getKey, Tag::getValue));
-    }
-
-    private static EntityContainer header(int version, Tag... tags) {
-        return container(bound(version, newArrayList(tags)));
+    private static EntityContainer header(Tag... tags) {
+        return container(bound(newArrayList(tags)));
     }
 
     private static EntityContainer container(Entity entity) {
@@ -153,14 +170,14 @@ class MergingOsmPbfIteratorTest {
     }
 
     private static CommonEntityData data(long id) {
-        return new CommonEntityData(id, 0, (Date) null, null, 0L);
+        return new CommonEntityData(id, 0, (TimestampContainer) null, null, 0L, new ArrayList<>(1));
     }
 
-    private static Bound bound(int version, Collection<Tag> tags) {
+    private static Bound bound(Collection<Tag> tags) {
         return new Bound("") {
             @Override
             public int getVersion() {
-                return version;
+                return 20170200;
             }
 
             @Override

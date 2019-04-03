@@ -25,8 +25,7 @@ public class ShapefileIterator implements Iterator<Feature>, Closeable {
             FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore.getFeatureSource(dataStore.getTypeNames()[0]);
             FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(INCLUDE);
             features = collection.features();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new IllegalStateException("Could not read shapefile.", e);
         }
     }
