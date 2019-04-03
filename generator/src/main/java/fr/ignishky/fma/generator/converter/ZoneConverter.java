@@ -6,6 +6,7 @@ import fr.ignishky.fma.generator.converter.product.A0Shapefile;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.merger.OsmMerger;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -48,8 +49,9 @@ class ZoneConverter {
         }
 
         log.info("Generate zone '{}-{}' with products : {}", countryCode, zoneCode, toZone(products));
+        StopWatch watch = StopWatch.createStarted();
 
-        List<String> convertFiles = new ArrayList<>(1);
+        List<String> convertFiles = new ArrayList<>(10);
 
         if ("ax".equals(zoneCode)) {
             convertFiles.add(a0Shapefile.convert(countryCode, zoneCode, capitalProvider));
@@ -63,6 +65,7 @@ class ZoneConverter {
         Path outputFile = Paths.get(outputFolder.getPath(), countryCode, zoneCode, zoneCode + ".osm.pbf");
         osmMerger.merge(convertFiles, outputFile);
 
+        log.info("Zone {}-{} generated in {} ms", countryCode, zoneCode, watch.getTime());
         return outputFile.toString();
     }
 

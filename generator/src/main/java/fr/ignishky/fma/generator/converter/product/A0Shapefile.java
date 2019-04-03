@@ -47,6 +47,11 @@ public class A0Shapefile extends Shapefile {
     }
 
     @Override
+    protected String getProductName() {
+        return "a0";
+    }
+
+    @Override
     protected String getInputFile(String countryCode) {
         return countryCode + "______________a0.shp";
     }

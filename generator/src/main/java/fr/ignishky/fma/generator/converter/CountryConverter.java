@@ -5,6 +5,7 @@ import com.google.inject.name.Named;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.merger.OsmMerger;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -46,6 +47,7 @@ public class CountryConverter {
         }
 
         log.info("Generate country '{}' with zones : {}", countryCode, zones);
+        StopWatch watch = StopWatch.createStarted();
 
         capitalProvider.init(countryCode);
 
@@ -57,6 +59,7 @@ public class CountryConverter {
         Path outputFile = Paths.get(outputFolder.getPath(), countryCode, countryCode + ".osm.pbf");
 
         osmMerger.merge(convertedZoneFiles, outputFile);
+        log.info("Country {} generated in {} ms", countryCode, watch.getTime());
 
         return outputFile.toString();
     }

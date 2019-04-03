@@ -7,6 +7,7 @@ import fr.ignishky.fma.generator.reader.ShapefileIterator;
 import fr.ignishky.fma.generator.writer.GeometrySerializer;
 import fr.ignishky.fma.generator.writer.OsmosisSerializer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,9 @@ public abstract class Shapefile {
 
     public String convert(String countryCode, String zoneCode, CapitalProvider capitalProvider) {
 
+        log.info("Generate product '{}' for country '{}' for zone '{}'", getProductName(), countryCode, zoneCode);
+        StopWatch watch = StopWatch.createStarted();
+
         nameProvider.loadAlternateNames(Paths.get(inputFolder.getPath(), countryCode, zoneCode, getNameFile(countryCode)));
 
         Path outputZoneFile = getOutputFile(countryCode, zoneCode);
@@ -48,6 +52,7 @@ public abstract class Shapefile {
             throw new IllegalStateException(format("Unable to correctly close %s", outputZoneFile), e);
         }
 
+        log.info("Product {}-{}-{} generated in {} ms", countryCode, zoneCode, getProductName(), watch.getTime());
         return outputZoneFile.toString();
     }
 
@@ -69,6 +74,8 @@ public abstract class Shapefile {
 
         return new ShapefileIterator(inputShapefile);
     }
+
+    protected abstract String getProductName();
 
     protected abstract String getInputFile(String countryCode);
 

@@ -5,6 +5,7 @@ import com.google.inject.name.Named;
 import fr.ignishky.fma.generator.converter.CountryConverter;
 import fr.ignishky.fma.generator.merger.OsmMerger;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -35,7 +36,6 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        log.debug("Start generating OSM PBF files.");
         checkArgument(args.length == 2, "Usage : Main <inputFolder> <outputFolder>");
 
         createInjector(new GeneratorModule(args[0], args[1])).getInstance(Main.class).run();
@@ -48,10 +48,13 @@ public class Main {
             throw new IllegalArgumentException("<inputFolder> must be a valid non-empty directory.");
         }
 
-        log.info("Generating OSM file with countries : {}", Arrays.toString(countries));
+        log.info("Generating Europe file with countries : {}", Arrays.toString(countries));
+        StopWatch watch = StopWatch.createStarted();
 
         List<String> convertedCountries = Stream.of(countries).map(country::convert).collect(toList());
 
         osmMerger.merge(convertedCountries, Paths.get(outputFolder.getPath(), "Europe.osm.pbf"));
+
+        log.info("Europe.osm.pbf generated in {} ms", watch.getTime());
     }
 }

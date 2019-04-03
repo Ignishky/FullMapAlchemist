@@ -11,7 +11,7 @@
       </filter>
       <encoder>
          <charset>UTF-8</charset>
-         <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} [%thread] %-5level %logger{60} - %msg%n</pattern>
+         <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} [%thread] %-5level %-50logger{50} - %msg%n</pattern>
       </encoder>
    </appender>
 
