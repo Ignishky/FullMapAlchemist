@@ -31,7 +31,7 @@ class ZoneConverterTest {
 
     @Test
     void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
-        assertThrows(IllegalArgumentException.class, () -> zoneConverter.convert("lux", "fake", null));
+        assertThrows(IllegalArgumentException.class, () -> zoneConverter.convert("lux", "fake", capitalProvider));
         verifyZeroInteractions(a0Shapefile, capitalProvider);
     }
 
