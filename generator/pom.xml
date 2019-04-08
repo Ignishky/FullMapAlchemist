@@ -15,6 +15,9 @@
 
     <properties>
         <maven.version.rules>file:///${project.basedir}/../config/versions-rules.xml</maven.version.rules>
+
+        <geotools.version>19.2</geotools.version>
+        <osmosis.version>0.45</osmosis.version>
     </properties>
 
     <dependencies>
@@ -26,6 +29,10 @@
             <groupId>com.github.davidmoten</groupId>
             <artifactId>geo</artifactId>
             <version>0.7.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -51,23 +58,43 @@
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
+            <artifactId>gt-api</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
-            <version>19.2</version>
+            <version>${geotools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-opengis</artifactId>
+            <version>${geotools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jamel.dbf</groupId>
             <artifactId>dbf-reader</artifactId>
-            <version>0.2.0</version>
+            <version>0.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openstreetmap.osmosis</groupId>
+            <artifactId>osmosis-core</artifactId>
+            <version>${osmosis.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openstreetmap.osmosis</groupId>
+            <artifactId>osmosis-osm-binary</artifactId>
+            <version>${osmosis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openstreetmap.osmosis</groupId>
             <artifactId>osmosis-pbf</artifactId>
-            <version>0.45</version>
+            <version>${osmosis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openstreetmap.osmosis</groupId>
             <artifactId>osmosis-pbf2</artifactId>
-            <version>0.45</version>
+            <version>${osmosis.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -80,7 +107,7 @@
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
