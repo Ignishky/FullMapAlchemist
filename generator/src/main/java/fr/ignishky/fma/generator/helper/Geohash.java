@@ -1,5 +1,7 @@
 package fr.ignishky.fma.generator.helper;
 
+import com.github.davidmoten.geo.GeoHash;
+import com.github.davidmoten.geo.LatLong;
 import com.vividsolutions.jts.geom.Coordinate;
 
 import static com.github.davidmoten.geo.GeoHash.encodeHash;
@@ -40,5 +42,23 @@ public final class Geohash {
             lookup[ch] = i++;
         }
         return lookup;
+    }
+
+    public static LatLong decodeGeohash(long geohash) {
+        return GeoHash.decodeHash(decodeString(withoutLayer(geohash)));
+    }
+
+    private static String decodeString(long geohash) {
+        StringBuilder sb = new StringBuilder();
+        while (geohash != 0) {
+            sb.append(SYMBOLS.charAt((int) (geohash % SYMBOLS.length())));
+            geohash /= SYMBOLS.length();
+        }
+        return sb.reverse().toString();
+    }
+
+    private static long withoutLayer(long geohash) {
+        long mask = 0b111L << 55;
+        return geohash & ~mask;
     }
 }

@@ -5,6 +5,7 @@ import com.google.inject.name.Named;
 import fr.ignishky.fma.generator.converter.product.A0Shapefile;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.merger.OsmMerger;
+import fr.ignishky.fma.generator.split.Splitter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 
@@ -32,13 +33,16 @@ class ZoneConverter {
     private final File outputFolder;
     private final A0Shapefile a0Shapefile;
     private final OsmMerger osmMerger;
+    private final Splitter splitter;
 
     @Inject
-    ZoneConverter(@Named(INPUT_FOLDER) File inputFolder, @Named(OUTPUT_FOLDER) File outputFolder, A0Shapefile a0Shapefile, OsmMerger osmMerger) {
+    ZoneConverter(@Named(INPUT_FOLDER) File inputFolder, @Named(OUTPUT_FOLDER) File outputFolder, A0Shapefile a0Shapefile,
+                  OsmMerger osmMerger, Splitter splitter) {
         this.inputFolder = inputFolder;
         this.outputFolder = outputFolder;
         this.a0Shapefile = a0Shapefile;
         this.osmMerger = osmMerger;
+        this.splitter = splitter;
     }
 
     String convert(String countryCode, String zoneCode, CapitalProvider capitalProvider) {
@@ -59,11 +63,14 @@ class ZoneConverter {
 
         //TODO : To delete when all zone have data.
         if (convertFiles.isEmpty()) {
+            log.info("Still Nothing to do in zone {}", zoneCode);
             return null;
         }
 
         Path outputFile = Paths.get(outputFolder.getPath(), countryCode, zoneCode, zoneCode + ".osm.pbf");
         osmMerger.merge(convertFiles, outputFile);
+
+        splitter.split(outputFile);
 
         log.info("Zone {}-{} generated in {} ms", countryCode, zoneCode, watch.getTime());
         return outputFile.toString();
