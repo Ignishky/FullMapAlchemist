@@ -13,6 +13,7 @@
     <modules>
         <module>preparator</module>
         <module>generator</module>
+        <module>visualisator</module>
     </modules>
 
     <properties>

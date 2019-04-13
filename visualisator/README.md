@@ -6,4 +6,43 @@
 
 That's it.
 
-Due to large file, you could be oblige to increase -Xmx as explain in the link above. 
+Due to large file, you could be oblige to increase -Xmx as explain in the link above.
+
+## Pbf2Api
+
+### Build
+
+```bash
+docker build -t ignishky/fma_pbf2api ./pbf2api 
+```
+
+### Run
+
+Mandatory : a data generation must have been done.
+
+```bash
+docker run --rm -v /path/to/splitter/directory:/splitter -p 9090:9090 -t ignishky/fma_pbf2api /splitter
+```
+## iDeditor
+
+### Download
+```bash
+git clone --depth=1 https://github.com/openstreetmap/iD.git
+cd iD
+```
+
+### Redirect
+
+iD get details from a server, by default an OSM one, we need to use a custom one that is couple with our own data.
+
+That's the goal of Pbf2APi.
+
+All we need to change is the value of the properties `urlroot` in the file `modules/services/osm.js` to our Pbf2Api server to `http://localhost:9090`.
+
+### Run 
+```bash
+npm install
+npm run all
+npm start
+```
+http://localhost:8080
