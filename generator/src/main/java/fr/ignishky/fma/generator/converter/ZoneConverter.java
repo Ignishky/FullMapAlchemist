@@ -3,6 +3,7 @@ package fr.ignishky.fma.generator.converter;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import fr.ignishky.fma.generator.converter.product.A0Shapefile;
+import fr.ignishky.fma.generator.converter.product.RailRoadShapefile;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.merger.OsmMerger;
 import fr.ignishky.fma.generator.split.Splitter;
@@ -32,15 +33,17 @@ class ZoneConverter {
     private final File inputFolder;
     private final File outputFolder;
     private final A0Shapefile a0Shapefile;
+    private final RailRoadShapefile railRoadShapefile;
     private final OsmMerger osmMerger;
     private final Splitter splitter;
 
     @Inject
     ZoneConverter(@Named(INPUT_FOLDER) File inputFolder, @Named(OUTPUT_FOLDER) File outputFolder, A0Shapefile a0Shapefile,
-                  OsmMerger osmMerger, Splitter splitter) {
+                  RailRoadShapefile railRoadShapefile, OsmMerger osmMerger, Splitter splitter) {
         this.inputFolder = inputFolder;
         this.outputFolder = outputFolder;
         this.a0Shapefile = a0Shapefile;
+        this.railRoadShapefile = railRoadShapefile;
         this.osmMerger = osmMerger;
         this.splitter = splitter;
     }
@@ -59,12 +62,8 @@ class ZoneConverter {
 
         if ("ax".equals(zoneCode)) {
             convertFiles.add(a0Shapefile.convert(countryCode, zoneCode, capitalProvider));
-        }
-
-        //TODO : To delete when all zone have data.
-        if (convertFiles.isEmpty()) {
-            log.info("Still Nothing to do in zone {}", zoneCode);
-            return null;
+        } else {
+            convertFiles.add(railRoadShapefile.convert(countryCode, zoneCode));
         }
 
         Path outputFile = Paths.get(outputFolder.getPath(), countryCode, zoneCode, zoneCode + ".osm.pbf");

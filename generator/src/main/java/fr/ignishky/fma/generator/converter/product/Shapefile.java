@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static fr.ignishky.fma.generator.reader.Feature.Attribute.NAME;
 import static java.lang.String.format;
 
 @Slf4j
@@ -30,12 +29,18 @@ public abstract class Shapefile {
         this.outputFolder = outputFolder;
     }
 
+    public String convert(String countryCode, String zoneCode) {
+        return convert(countryCode, zoneCode, null);
+    }
+
     public String convert(String countryCode, String zoneCode, CapitalProvider capitalProvider) {
 
-        log.info("Generate product '{}' for country '{}' for zone '{}'", getProductName(), countryCode, zoneCode);
+        log.info("Generate product '{}' for zone '{}-{}'", getProductName(), countryCode, zoneCode);
         StopWatch watch = StopWatch.createStarted();
 
-        nameProvider.loadAlternateNames(Paths.get(inputFolder.getPath(), countryCode, zoneCode, getNameFile(countryCode)));
+        if (getNameFile(countryCode) != null) {
+            nameProvider.loadAlternateNames(Paths.get(inputFolder.getPath(), countryCode, zoneCode, getNameFile(countryCode)));
+        }
 
         Path outputZoneFile = getOutputFile(countryCode, zoneCode);
 
@@ -43,10 +48,7 @@ public abstract class Shapefile {
              ShapefileIterator iterator = getShapefileIterator(countryCode, zoneCode)) {
 
             while (iterator.hasNext()) {
-                Feature next = iterator.next();
-                if (next.getString(NAME) != null) {
-                    serialize(serializer, next, capitalProvider);
-                }
+                serialize(serializer, iterator.next(), capitalProvider);
             }
         } catch (IOException e) {
             throw new IllegalStateException(format("Unable to correctly close %s", outputZoneFile), e);
@@ -66,18 +68,18 @@ public abstract class Shapefile {
 
     private ShapefileIterator getShapefileIterator(String countryCode, String zoneCode) {
 
-        Path inputShapefile = Paths.get(inputFolder.getPath(), countryCode, zoneCode, getInputFile(countryCode));
+        Path inputShapefile = Paths.get(inputFolder.getPath(), countryCode, zoneCode, getInputFile(countryCode, zoneCode));
         if (!inputShapefile.toFile().exists()) {
             throw new IllegalStateException("Missing file " + inputShapefile);
         }
-        log.info("Opening {}", inputShapefile);
+        log.info("Reading SHP {}", inputShapefile);
 
         return new ShapefileIterator(inputShapefile);
     }
 
     protected abstract String getProductName();
 
-    protected abstract String getInputFile(String countryCode);
+    protected abstract String getInputFile(String countryCode, String zoneCode);
 
     protected abstract String getNameFile(String countryCode);
 

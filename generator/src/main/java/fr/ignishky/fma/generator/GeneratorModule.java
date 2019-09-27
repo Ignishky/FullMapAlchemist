@@ -1,11 +1,12 @@
 package fr.ignishky.fma.generator;
 
 import com.google.inject.AbstractModule;
-import fr.ignishky.fma.generator.utils.Constants;
 
 import java.io.File;
 
 import static com.google.inject.name.Names.named;
+import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
+import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
 
 public class GeneratorModule extends AbstractModule {
 
@@ -20,7 +21,7 @@ public class GeneratorModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(File.class).annotatedWith(named(Constants.INPUT_FOLDER)).toInstance(inputFolder);
-        bind(File.class).annotatedWith(named(Constants.OUTPUT_FOLDER)).toInstance(outputFolder);
+        bind(File.class).annotatedWith(named(INPUT_FOLDER)).toInstance(inputFolder);
+        bind(File.class).annotatedWith(named(OUTPUT_FOLDER)).toInstance(outputFolder);
     }
 }

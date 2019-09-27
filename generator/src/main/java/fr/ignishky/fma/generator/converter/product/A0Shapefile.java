@@ -52,7 +52,7 @@ public class A0Shapefile extends Shapefile {
     }
 
     @Override
-    protected String getInputFile(String countryCode) {
+    protected String getInputFile(String countryCode, String zoneCode) {
         return countryCode + "______________a0.shp";
     }
 
@@ -69,6 +69,10 @@ public class A0Shapefile extends Shapefile {
     @Override
     protected void serialize(GeometrySerializer serializer, Feature feature, CapitalProvider capitalProvider) {
         String name = feature.getString(NAME);
+
+        if (name == null) {
+            return;
+        }
 
         Map<String, String> tags = new HashMap<>(10);
         tags.put(TAG_NAME, name);
