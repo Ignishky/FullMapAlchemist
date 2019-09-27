@@ -10,12 +10,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 class ArchiveDownloaderTest {
@@ -46,5 +49,15 @@ class ArchiveDownloaderTest {
         File file = archiveDownloader.apply(new Content("content.7z.001", "loc"));
 
         assertThat(file.getPath()).isEqualTo("target/content.7z.001");
+    }
+
+    @Test
+    void should_do_nothing_when_file_already_present() throws Exception {
+        File expected = Files.createTempFile(Paths.get("target"), "test", "").toFile();
+
+        File file = archiveDownloader.apply(new Content(expected.getName(), "loc"));
+
+        verifyZeroInteractions(client);
+        assertThat(file).isEqualTo(expected);
     }
 }

@@ -37,7 +37,6 @@ class ShapefileExtractorTest {
         Files.copy(Paths.get("src/test/resources/downloader/eur2018_09-shp-empty-unvalid-archive.7z.001"), tempFile, REPLACE_EXISTING);
 
         assertThrows(IllegalArgumentException.class, () -> shapefileExtractor.decompress(tempFile.toFile()));
-        assertThat(tempFile.toFile().exists()).isFalse();
     }
 
     @Test
@@ -51,6 +50,5 @@ class ShapefileExtractorTest {
         assertThat(new File("target/preparator/extractor/lux")).exists();
         assertThat(new File("target/preparator/extractor/lux/ax")).exists();
         assertThat(new File("target/preparator/extractor/lux/ax/lux______________a0.shp")).exists();
-        assertThat(tempFile.toFile().exists()).isFalse();
     }
 }

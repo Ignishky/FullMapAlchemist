@@ -39,6 +39,11 @@ public class ArchiveDownloader implements Function<Content, File> {
         String name = content.getName();
         File downloaded = new File(outputFolder, name);
 
+        if (downloaded.exists()) {
+            log.info("File {} already present", downloaded.getName());
+            return downloaded;
+        }
+
         String archiveUrl = content.getLocation() + "/download-url";
         HttpGet get = new HttpGet(archiveUrl);
         get.addHeader(AUTHORIZATION, token);
@@ -48,7 +53,7 @@ public class ArchiveDownloader implements Function<Content, File> {
 
             String redirectUrl = new Gson().fromJson(IOUtils.toString(redirect, UTF_8), Redirect.class).getUrl();
 
-            log.info("Downloading {} to {}", redirectUrl, downloaded.getAbsolutePath());
+            log.debug("Downloading {} to {}", redirectUrl, downloaded.getAbsolutePath());
             try (InputStream archive = client.execute(new HttpGet(redirectUrl)).getEntity().getContent()) {
                 copyInputStreamToFile(archive, downloaded);
             }

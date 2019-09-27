@@ -18,7 +18,6 @@ import java.util.zip.GZIPInputStream;
 import static fr.ignishky.fma.preparator.extractor.TomtomFile.allFilesFrom;
 import static fr.ignishky.fma.preparator.utils.Constants.OUTPUT_FOLDER;
 import static fr.ignishky.fma.preparator.utils.Constants.PATTERN_7ZIP_FILE;
-import static java.nio.file.Files.delete;
 
 @Slf4j
 public class ShapefileExtractor {
@@ -66,13 +65,6 @@ public class ShapefileExtractor {
 
         } catch (IOException e) {
             throw new IllegalArgumentException("Something went wrong while extracting " + file.getName(), e);
-
-        } finally {
-            try {
-                delete(file.toPath());
-            } catch (IOException e) {
-                log.warn("Unable to delete file {}", file.getName());
-            }
         }
     }
 }
