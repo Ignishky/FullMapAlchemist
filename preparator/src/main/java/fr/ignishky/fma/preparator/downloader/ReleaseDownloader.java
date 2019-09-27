@@ -46,7 +46,7 @@ public class ReleaseDownloader implements Function<Product, Stream<Release>> {
 
         try (InputStream response = client.execute(get).getEntity().getContent()) {
 
-            return new Gson().fromJson(IOUtils.toString(response, UTF_8), Releases.class).getContent().stream() //
+            return new Gson().fromJson(IOUtils.toString(response, UTF_8), Releases.class).getContent().stream()
                     .filter(release -> version.equals(release.getVersion()));
 
         } catch (IOException e) {

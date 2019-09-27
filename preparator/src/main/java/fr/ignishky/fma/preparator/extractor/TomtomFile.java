@@ -7,7 +7,8 @@ public enum TomtomFile {
     BOUNDARIES_LEVEL0("mn", "______________a0."),
     ALTERNATE_NAMES("mn", "_an."),
     RAILROADS("mn", "_rr."),
-    CENTERS_OF_SETTLEMENT("mn", "_sm.");
+    CENTERS_OF_SETTLEMENT("mn", "_sm."),
+    WATER_AREA("mn", "_wa.");
 
     private final String product;
     private final String value;
