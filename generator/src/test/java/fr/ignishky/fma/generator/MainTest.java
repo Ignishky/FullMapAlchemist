@@ -12,7 +12,6 @@ import java.util.List;
 import static fr.ignishky.fma.generator.utils.TestConstants.RESOURCES_INPUT;
 import static fr.ignishky.fma.generator.utils.TestConstants.TARGET_GENERATOR;
 import static java.nio.file.Files.createTempDirectory;
-import static java.nio.file.Files.createTempFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
@@ -34,7 +33,7 @@ class MainTest {
     @Test
     void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() throws Exception {
 
-        Main main = new Main(createTempFile("", "").toFile(), OUTPUT_FOLDER, countryConverter, osmMerger);
+        Main main = new Main(createTempDirectory("").toFile(), OUTPUT_FOLDER, countryConverter, osmMerger);
 
         assertThrows(IllegalArgumentException.class, main::run);
     }

@@ -2,6 +2,8 @@ package fr.ignishky.fma.preparator.extractor;
 
 import java.util.stream.Stream;
 
+import static java.util.Arrays.stream;
+
 public enum TomtomFile {
 
     BOUNDARIES_LEVEL0("mn", "______________a0."),
@@ -19,7 +21,7 @@ public enum TomtomFile {
     }
 
     public static Stream<String> allFilesFrom(String product) {
-        return Stream.of(TomtomFile.values())
+        return stream(TomtomFile.values())
                 .filter(tomtomFile -> tomtomFile.product.equals(product))
                 .map(tomtomFile -> tomtomFile.value);
     }

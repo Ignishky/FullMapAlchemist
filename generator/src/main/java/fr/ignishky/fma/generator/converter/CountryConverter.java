@@ -12,11 +12,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
 import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -51,7 +51,7 @@ public class CountryConverter {
 
         capitalProvider.init(countryCode);
 
-        List<String> convertedZoneFiles = Stream.of(zones)
+        List<String> convertedZoneFiles = stream(zones)
                 .map(zoneCode -> zone.convert(countryCode, zoneCode, capitalProvider))
                 .filter(Objects::nonNull) //TODO : To delete when all zone have data.
                 .collect(toList());

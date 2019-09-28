@@ -29,7 +29,8 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 public class ContentDownloader implements Function<Release, Stream<Content>> {
 
     private static final List<String> ALLOWED = singletonList("mn");
-    private static final List<String> COUNTRIES = asList("bel", "lux", "nld");
+    private static final List<String> COUNTRIES = asList("alb", "and", "arm", "aut", "aze", "bel", "bgr", "bih", "blr", "che", "cyp", "cze", "deu",
+            "dnk", "esp", "fra", "ita", "lux", "nld");
 
     private final HttpClient client;
     private final String token;

@@ -67,7 +67,7 @@ class ZoneConverterTest {
     @SuppressWarnings("unchecked")
     void should_convert_and_split_railroad_shapefile_for_none_ax_zone() {
         String productPbfFileName = "convertLuxLux.osm.pbf";
-        when(railRoadShapefile.convert("lux", "lux", null)).thenReturn(productPbfFileName);
+        when(railRoadShapefile.convert("lux", "lux")).thenReturn(productPbfFileName);
 
         String generate = zoneConverter.convert("lux", "lux", capitalProvider);
 

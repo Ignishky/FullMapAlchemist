@@ -43,28 +43,6 @@
       "zones": [
         "EUR.AND"
       ]
-    },
-    {
-      "action": {
-        "method": "7zip",
-        "name": "extract"
-      },
-      "checksum": "0c2ba774e0fbca9f0c556c7bfab91f60",
-      "checksumType": "md5",
-      "contents": [],
-      "folder": false,
-      "geoRestrictions": [],
-      "id": 298,
-      "labels": [
-        "shpd"
-      ],
-      "location": "https://api.test/contents/298",
-      "name": "eur2016_09-shpd-mn-fra-ax.7z.001",
-      "path": "/",
-      "sizeBytes": 77832,
-      "zones": [
-        "EUR.AND.AX"
-      ]
     }
   ],
   "deliveryType": "full",

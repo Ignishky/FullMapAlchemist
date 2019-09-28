@@ -2,7 +2,7 @@ package fr.ignishky.fma.generator.converter.dbf;
 
 import lombok.Getter;
 
-import java.util.stream.Stream;
+import static java.util.Arrays.stream;
 
 public enum Language {
     AFR("af"),
@@ -155,6 +155,9 @@ public enum Language {
     }
 
     public static Language fromValue(String name) {
-        return Stream.of(Language.values()).filter(v -> v.name().equals(name)).findFirst().orElse(UND);
+        return stream(Language.values())
+                .filter(v -> v.name().equals(name))
+                .findFirst()
+                .orElse(UND);
     }
 }

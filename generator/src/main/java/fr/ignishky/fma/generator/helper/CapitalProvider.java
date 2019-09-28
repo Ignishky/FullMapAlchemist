@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
 
 @Slf4j
 public class CapitalProvider {
@@ -34,7 +35,7 @@ public class CapitalProvider {
             throw new IllegalArgumentException(format("<inputFolder>/%s should be a valid non empty non-empty folder.", countryCode));
         }
 
-        Stream.of(countryFiles)
+        stream(countryFiles)
                 .map(File::listFiles)
                 .flatMap(Stream::of)
                 .filter(file -> file.getName().endsWith("sm.shp"))

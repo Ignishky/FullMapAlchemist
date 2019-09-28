@@ -9,14 +9,13 @@ import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.inject.Guice.createInjector;
 import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
 import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -42,16 +41,17 @@ public class Main {
     }
 
     void run() {
-        String[] countries = inputFolder.list();
 
-        if (countries == null || countries.length == 0) {
+        List<String> countryCodes = stream(inputFolder.list()).filter(code -> !code.endsWith("7z.001")).collect(toList());
+
+        if (countryCodes.isEmpty()) {
             throw new IllegalArgumentException("<inputFolder> must be a valid non-empty directory.");
         }
 
-        log.info("Generating Europe file with countries : {}", Arrays.toString(countries));
+        log.info("Generating Europe file with countries : {}", countryCodes);
         StopWatch watch = StopWatch.createStarted();
 
-        List<String> convertedCountries = Stream.of(countries).map(country::convert).collect(toList());
+        List<String> convertedCountries = countryCodes.stream().map(country::convert).collect(toList());
 
         osmMerger.merge(convertedCountries, Paths.get(outputFolder.getPath(), "Europe.osm.pbf"));
 

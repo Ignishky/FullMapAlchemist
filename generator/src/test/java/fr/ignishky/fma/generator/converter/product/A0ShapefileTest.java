@@ -28,6 +28,7 @@ import static fr.ignishky.fma.generator.utils.Constants.TAG_LAYER;
 import static fr.ignishky.fma.generator.utils.Constants.TAG_NAME;
 import static fr.ignishky.fma.generator.utils.Constants.TAG_TYPE;
 import static fr.ignishky.fma.generator.utils.PbfUtils.read;
+import static fr.ignishky.fma.generator.utils.ShapefileUtils.assertTag;
 import static fr.ignishky.fma.generator.utils.TestConstants.RESOURCES_INPUT;
 import static fr.ignishky.fma.generator.utils.TestConstants.TARGET_GENERATOR;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,9 +78,5 @@ class A0ShapefileTest {
 
         List<RelationMember> members = relation.getMembers();
         assertThat(members.stream().map(RelationMember::getMemberRole)).containsOnly(ROLE_LABEL, ROLE_OUTER, ROLE_ADMIN_CENTRE);
-    }
-
-    private static void assertTag(Collection<? extends Tag> tags, String key, String value) {
-        assertThat(tags.stream().filter(tag -> key.equals(tag.getKey())).map(Tag::getValue)).containsOnly(value);
     }
 }

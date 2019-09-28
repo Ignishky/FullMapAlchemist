@@ -2,7 +2,7 @@ package fr.ignishky.fma.generator.helper;
 
 import lombok.Getter;
 
-import java.util.stream.Stream;
+import static java.util.Arrays.stream;
 
 @Getter
 public enum CityType {
@@ -30,7 +30,7 @@ public enum CityType {
     }
 
     public static String getOsmValue(int value, int displayClass) {
-        return Stream.of(CityType.values())
+        return stream(CityType.values())
                 .filter(cityType -> isTheBiggestCityType(value, displayClass < 8, cityType))
                 .map(CityType::getValue)
                 .findFirst().orElse("town");

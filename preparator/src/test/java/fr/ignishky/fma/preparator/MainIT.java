@@ -36,7 +36,7 @@ class MainIT {
 
         main.run();
 
-        assertThat(list(get(OUTPUT_FOLDER))).containsOnly(get(OUTPUT_FOLDER, "lux"));
+        assertThat(list(get(OUTPUT_FOLDER))).containsOnly(get(OUTPUT_FOLDER, "lux"), get(OUTPUT_FOLDER, "eur2016_09-shpd-mn-lux-lux.7z.001"));
         assertThat(list(get(OUTPUT_FOLDER , "lux"))).containsOnly(get(OUTPUT_FOLDER, "lux", "lux"));
         assertThat(list(get(OUTPUT_FOLDER , "lux", "lux"))).containsOnly(get(OUTPUT_FOLDER, "lux", "lux", "lux______________a0.shp"));
     }

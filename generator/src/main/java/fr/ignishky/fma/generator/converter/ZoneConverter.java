@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
 import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
 import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Stream.of;
 
 @Slf4j
 class ZoneConverter {
@@ -76,6 +76,10 @@ class ZoneConverter {
     }
 
     private static Set<String> toZone(String[] products) {
-        return of(products).map(PATTERN_PRODUCT_FILE::matcher).filter(Matcher::matches).map(matcher -> matcher.group(1)).collect(toSet());
+        return stream(products)
+                .map(PATTERN_PRODUCT_FILE::matcher)
+                .filter(Matcher::matches)
+                .map(matcher -> matcher.group(1))
+                .collect(toSet());
     }
 }
