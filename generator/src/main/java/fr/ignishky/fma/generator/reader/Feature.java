@@ -7,7 +7,7 @@ import com.vividsolutions.jts.geom.Point;
 public interface Feature {
 
     enum Attribute {
-        ID, NAME, POSTCODE, ADMINCLASS, CITYTYP, DISPCLASS, PARTSTRUC
+        ID, NAME, POSTCODE, ADMINCLASS, CITYTYP, DISPCLASS, PARTSTRUC, TYP
     }
 
     String getString(Attribute attr);

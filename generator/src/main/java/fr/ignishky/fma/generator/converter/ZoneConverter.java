@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import fr.ignishky.fma.generator.converter.product.A0Shapefile;
 import fr.ignishky.fma.generator.converter.product.RailRoadShapefile;
+import fr.ignishky.fma.generator.converter.product.WaterArea;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.merger.OsmMerger;
 import fr.ignishky.fma.generator.split.Splitter;
@@ -34,16 +35,18 @@ class ZoneConverter {
     private final File outputFolder;
     private final A0Shapefile a0Shapefile;
     private final RailRoadShapefile railRoadShapefile;
+    private final WaterArea waterArea;
     private final OsmMerger osmMerger;
     private final Splitter splitter;
 
     @Inject
     ZoneConverter(@Named(INPUT_FOLDER) File inputFolder, @Named(OUTPUT_FOLDER) File outputFolder, A0Shapefile a0Shapefile,
-                  RailRoadShapefile railRoadShapefile, OsmMerger osmMerger, Splitter splitter) {
+                  RailRoadShapefile railRoadShapefile, WaterArea waterArea, OsmMerger osmMerger, Splitter splitter) {
         this.inputFolder = inputFolder;
         this.outputFolder = outputFolder;
         this.a0Shapefile = a0Shapefile;
         this.railRoadShapefile = railRoadShapefile;
+        this.waterArea = waterArea;
         this.osmMerger = osmMerger;
         this.splitter = splitter;
     }
@@ -64,6 +67,7 @@ class ZoneConverter {
             convertFiles.add(a0Shapefile.convert(countryCode, zoneCode, capitalProvider));
         } else {
             convertFiles.add(railRoadShapefile.convert(countryCode, zoneCode));
+            convertFiles.add(waterArea.convert(countryCode, zoneCode));
         }
 
         Path outputFile = Paths.get(outputFolder.getPath(), countryCode, zoneCode, zoneCode + ".osm.pbf");
