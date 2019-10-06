@@ -1,7 +1,7 @@
 package fr.ignishky.fma.generator.converter;
 
-import fr.ignishky.fma.generator.converter.product.A0Shapefile;
-import fr.ignishky.fma.generator.converter.product.RailRoadShapefile;
+import fr.ignishky.fma.generator.converter.product.A0;
+import fr.ignishky.fma.generator.converter.product.RailRoad;
 import fr.ignishky.fma.generator.converter.product.WaterArea;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.merger.OsmMerger;
@@ -25,35 +25,35 @@ import static org.mockito.Mockito.when;
 
 class ZoneConverterTest {
 
-    private final A0Shapefile a0Shapefile = mock(A0Shapefile.class);
-    private final RailRoadShapefile railRoadShapefile = mock(RailRoadShapefile.class);
+    private final A0 a0 = mock(A0.class);
+    private final RailRoad railRoad = mock(RailRoad.class);
     private final WaterArea waterArea = mock(WaterArea.class);
     private final OsmMerger osmMerger = mock(OsmMerger.class);
     private final Splitter splitter = mock(Splitter.class);
     private final CapitalProvider capitalProvider = mock(CapitalProvider.class);
     private final ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
-    private final ZoneConverter zoneConverter = new ZoneConverter(new File(RESOURCES_INPUT), new File(TARGET_GENERATOR), a0Shapefile,
-            railRoadShapefile, waterArea, osmMerger, splitter);
+    private final ZoneConverter zoneConverter = new ZoneConverter(new File(RESOURCES_INPUT), new File(TARGET_GENERATOR), a0,
+            railRoad, waterArea, osmMerger, splitter);
 
     @Test
     void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
         assertThrows(IllegalArgumentException.class, () -> zoneConverter.convert("lux", "fake", capitalProvider));
-        verifyZeroInteractions(a0Shapefile, splitter, capitalProvider);
+        verifyZeroInteractions(a0, splitter, capitalProvider);
     }
 
     @Test
     void should_only_call_a0_with_ax_zone() {
         zoneConverter.convert("lux", "lux", capitalProvider);
 
-        verifyZeroInteractions(a0Shapefile, capitalProvider);
+        verifyZeroInteractions(a0, capitalProvider);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void should_convert_and_split_a0_shapefile_for_ax_zone() {
         String productPbfFileName = "convertLuxAx.osm.pbf";
-        when(a0Shapefile.convert("lux", "ax", capitalProvider)).thenReturn(productPbfFileName);
+        when(a0.convert("lux", "ax", capitalProvider)).thenReturn(productPbfFileName);
 
         String generate = zoneConverter.convert("lux", "ax", capitalProvider);
 
@@ -69,7 +69,7 @@ class ZoneConverterTest {
     @SuppressWarnings("unchecked")
     void should_convert_and_split_railroad_shapefile_for_none_ax_zone() {
         String rrPbfFileName = "convertRrLux.osm.pbf";
-        when(railRoadShapefile.convert("lux", "lux")).thenReturn(rrPbfFileName);
+        when(railRoad.convert("lux", "lux")).thenReturn(rrPbfFileName);
         String waPbfFileName = "convertWaLux.osm.pbf";
         when(waterArea.convert("lux", "lux")).thenReturn(waPbfFileName);
 

@@ -28,7 +28,7 @@ class ArchiveDownloaderTest {
     private final ArchiveDownloader archiveDownloader = new ArchiveDownloader(new File("target"), client, TOKEN);
 
     @Test
-    void should_throws_IllegalStateException_when_client_throws_IOException() throws Exception {
+    void should_throw_IllegalStateException_when_client_throw_IOException() throws Exception {
 
         when(client.execute(any(HttpGet.class))).thenThrow(new IOException("Archive Test Exception"));
 

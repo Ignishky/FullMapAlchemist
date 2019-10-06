@@ -23,8 +23,8 @@ import static java.util.stream.Collectors.toList;
 class SplitterSerializers {
 
     private final SplitAreas areas = new SplitAreas();
-    private final List<Sink> serializers = new ArrayList<>(10);
-    private final Map<String, Integer> index = new HashMap<>(10);
+    private final List<Sink> serializers = new ArrayList<>();
+    private final Map<String, Integer> index = new HashMap<>();
     private final String parent;
 
     @Inject

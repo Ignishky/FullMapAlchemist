@@ -19,7 +19,7 @@ import static java.util.Arrays.stream;
 public class CapitalProvider {
 
     private final File inputFolder;
-    private final List<Centroid> capitals = new ArrayList<>(10);
+    private final List<Centroid> capitals = new ArrayList<>();
 
     @Inject
     CapitalProvider(@Named(INPUT_FOLDER) File inputFolder) {
@@ -30,12 +30,12 @@ public class CapitalProvider {
         log.info("Extract all capitals for country '{}'", countryCode);
         capitals.clear();
 
-        File[] countryFiles = Paths.get(inputFolder.getAbsolutePath(), countryCode).toFile().listFiles();
-        if (countryFiles == null || countryFiles.length == 0) {
-            throw new IllegalArgumentException(format("<inputFolder>/%s should be a valid non empty non-empty folder.", countryCode));
+        File[] zoneDirectories = Paths.get(inputFolder.getAbsolutePath(), countryCode).toFile().listFiles();
+        if (zoneDirectories == null || zoneDirectories.length == 0) {
+            throw new IllegalArgumentException(format("<inputFolder>/%s should be a non empty folder.", countryCode));
         }
 
-        stream(countryFiles)
+        stream(zoneDirectories)
                 .map(File::listFiles)
                 .flatMap(Stream::of)
                 .filter(file -> file.getName().endsWith("sm.shp"))

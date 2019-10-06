@@ -37,12 +37,12 @@ import static fr.ignishky.fma.generator.utils.Constants.TAG_TYPE;
 import static org.openstreetmap.osmosis.core.domain.v0_6.EntityType.Node;
 import static org.openstreetmap.osmosis.core.domain.v0_6.EntityType.Way;
 
-public class A0Shapefile extends Shapefile {
+public class A0 extends Shapefile {
 
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
     @Inject
-    A0Shapefile(@Named(INPUT_FOLDER) File inputFolder, NameProvider nameProvider, @Named(OUTPUT_FOLDER) File outputFolder) {
+    A0(@Named(INPUT_FOLDER) File inputFolder, NameProvider nameProvider, @Named(OUTPUT_FOLDER) File outputFolder) {
         super(inputFolder, nameProvider, outputFolder);
     }
 
@@ -74,12 +74,12 @@ public class A0Shapefile extends Shapefile {
             return;
         }
 
-        Map<String, String> tags = new HashMap<>(10);
+        Map<String, String> tags = new HashMap<>();
         tags.put(TAG_NAME, name);
         tags.putAll(nameProvider.getAlternateNames(feature.getLong(ID)));
         MultiPolygon multiPolygon = feature.getMultiPolygon();
 
-        List<RelationMember> members = new ArrayList<>(5);
+        List<RelationMember> members = new ArrayList<>();
 
         addLabel(serializer, tags, multiPolygon, members);
 

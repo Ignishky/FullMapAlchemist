@@ -56,7 +56,7 @@ public class WaterArea extends Shapefile {
     protected void serialize(GeometrySerializer serializer, Feature feature, CapitalProvider capitalProvider) {
 
         if (feature.getInt(TYP) != 1) {
-            Map<String, String> tags = new HashMap<>(10);
+            Map<String, String> tags = new HashMap<>();
             tags.put("natural", "water");
             if (feature.getString(NAME) != null) {
                 tags.put("name", feature.getString(NAME));

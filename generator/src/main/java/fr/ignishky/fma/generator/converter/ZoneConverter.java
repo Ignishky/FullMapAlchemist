@@ -2,8 +2,8 @@ package fr.ignishky.fma.generator.converter;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import fr.ignishky.fma.generator.converter.product.A0Shapefile;
-import fr.ignishky.fma.generator.converter.product.RailRoadShapefile;
+import fr.ignishky.fma.generator.converter.product.A0;
+import fr.ignishky.fma.generator.converter.product.RailRoad;
 import fr.ignishky.fma.generator.converter.product.WaterArea;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.merger.OsmMerger;
@@ -33,25 +33,25 @@ class ZoneConverter {
 
     private final File inputFolder;
     private final File outputFolder;
-    private final A0Shapefile a0Shapefile;
-    private final RailRoadShapefile railRoadShapefile;
+    private final A0 a0;
+    private final RailRoad railRoad;
     private final WaterArea waterArea;
     private final OsmMerger osmMerger;
     private final Splitter splitter;
 
     @Inject
-    ZoneConverter(@Named(INPUT_FOLDER) File inputFolder, @Named(OUTPUT_FOLDER) File outputFolder, A0Shapefile a0Shapefile,
-                  RailRoadShapefile railRoadShapefile, WaterArea waterArea, OsmMerger osmMerger, Splitter splitter) {
+    ZoneConverter(@Named(INPUT_FOLDER) File inputFolder, @Named(OUTPUT_FOLDER) File outputFolder, A0 a0,
+                  RailRoad railRoad, WaterArea waterArea, OsmMerger osmMerger, Splitter splitter) {
         this.inputFolder = inputFolder;
         this.outputFolder = outputFolder;
-        this.a0Shapefile = a0Shapefile;
-        this.railRoadShapefile = railRoadShapefile;
+        this.a0 = a0;
+        this.railRoad = railRoad;
         this.waterArea = waterArea;
         this.osmMerger = osmMerger;
         this.splitter = splitter;
     }
 
-    String convert(String countryCode, String zoneCode, CapitalProvider capitalProvider) {
+    public String convert(String countryCode, String zoneCode, CapitalProvider capitalProvider) {
         String[] products = Paths.get(inputFolder.getPath(), countryCode, zoneCode).toFile().list();
 
         if (products == null || products.length == 0) {
@@ -61,12 +61,12 @@ class ZoneConverter {
         log.info("Generate zone '{}-{}' with products : {}", countryCode, zoneCode, toZone(products));
         StopWatch watch = StopWatch.createStarted();
 
-        List<String> convertFiles = new ArrayList<>(10);
+        List<String> convertFiles = new ArrayList<>();
 
         if ("ax".equals(zoneCode)) {
-            convertFiles.add(a0Shapefile.convert(countryCode, zoneCode, capitalProvider));
+            convertFiles.add(a0.convert(countryCode, zoneCode, capitalProvider));
         } else {
-            convertFiles.add(railRoadShapefile.convert(countryCode, zoneCode));
+            convertFiles.add(railRoad.convert(countryCode, zoneCode));
             convertFiles.add(waterArea.convert(countryCode, zoneCode));
         }
 

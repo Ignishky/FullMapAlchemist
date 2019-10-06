@@ -34,13 +34,14 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        log.info("Start downloading Tomtom files.");
         checkArgument(args.length == 3, "Usage : Main <outputFolder> <token> <version>");
 
         createInjector(new PreparatorModule(args[0], args[1], args[2])).getInstance(Main.class).run();
     }
 
-    /* package */ void run() {
+    void run() {
+        log.info("Start downloading Tomtom files.");
+
         familiesDownloader.get()
                 .flatMap(productsDownloader)
                 .flatMap(releaseDownloader)

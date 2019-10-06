@@ -1,13 +1,11 @@
 package fr.ignishky.fma.generator.merger;
 
-import lombok.extern.slf4j.Slf4j;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Slf4j
 public class MergingOsmPbfIterator implements Iterator<EntityContainer> {
 
     private final Iterator<EntityContainer> it1;

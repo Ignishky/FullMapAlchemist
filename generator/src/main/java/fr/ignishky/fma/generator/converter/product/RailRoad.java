@@ -17,13 +17,13 @@ import static fr.ignishky.fma.generator.reader.Feature.Attribute.PARTSTRUC;
 import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
 import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
 
-public class RailRoadShapefile extends Shapefile {
+public class RailRoad extends Shapefile {
 
     private static final int TUNNEL = 1;
     private static final int BRIDGE = 2;
 
     @Inject
-    RailRoadShapefile(@Named(INPUT_FOLDER) File inputFolder, NameProvider nameProvider, @Named(OUTPUT_FOLDER) File outputFolder) {
+    RailRoad(@Named(INPUT_FOLDER) File inputFolder, NameProvider nameProvider, @Named(OUTPUT_FOLDER) File outputFolder) {
         super(inputFolder, nameProvider, outputFolder);
     }
 

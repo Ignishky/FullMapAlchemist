@@ -11,7 +11,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 
 import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
 import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
@@ -53,7 +52,6 @@ public class CountryConverter {
 
         List<String> convertedZoneFiles = stream(zones)
                 .map(zoneCode -> zone.convert(countryCode, zoneCode, capitalProvider))
-                .filter(Objects::nonNull) //TODO : To delete when all zone have data.
                 .collect(toList());
 
         Path outputFile = Paths.get(outputFolder.getPath(), countryCode, countryCode + ".osm.pbf");

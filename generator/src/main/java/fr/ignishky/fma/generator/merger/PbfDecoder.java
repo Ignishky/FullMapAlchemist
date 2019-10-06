@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
-import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.emptyList;
 
 final class PbfDecoder {
 
@@ -46,7 +46,7 @@ final class PbfDecoder {
 
     static List<EntityContainer> decode(PbfRawBlob data) {
         if (!"OSMData".equals(data.getType())) {
-            return EMPTY_LIST;
+            return emptyList();
         }
 
         PrimitiveBlock block = inflate(data);

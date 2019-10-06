@@ -25,18 +25,10 @@ class MainTest {
 
     private static final File INPUT_FOLDER = new File(RESOURCES_INPUT);
     private static final File OUTPUT_FOLDER = new File(TARGET_GENERATOR);
-    private final ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
+    private final ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
     private final CountryConverter countryConverter = mock(CountryConverter.class);
     private final OsmMerger osmMerger = mock(OsmMerger.class);
-
-    @Test
-    void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() throws Exception {
-
-        Main main = new Main(createTempDirectory("").toFile(), OUTPUT_FOLDER, countryConverter, osmMerger);
-
-        assertThrows(IllegalArgumentException.class, main::run);
-    }
 
     @Test
     void should_throw_IllegalArgumentException_when_inputFolder_is_empty() throws Exception {

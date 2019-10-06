@@ -37,18 +37,18 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class A0ShapefileTest {
+class A0Test {
 
     private static final String LUXEMBOURG = "Luxembourg";
 
     private final NameProvider nameProvider = mock(NameProvider.class);
     private final CapitalProvider capitalProvider = mock(CapitalProvider.class);
 
-    private final A0Shapefile a0Shapefile = new A0Shapefile(new File(RESOURCES_INPUT), nameProvider, new File(TARGET_GENERATOR));
+    private final A0 a0 = new A0(new File(RESOURCES_INPUT), nameProvider, new File(TARGET_GENERATOR));
 
     @Test
     void should_throw_IllegalStateException_when_a0_shapefile_missing_in_ax_folder() {
-        assertThrows(IllegalStateException.class, () -> a0Shapefile.convert("and", "ax", capitalProvider));
+        assertThrows(IllegalStateException.class, () -> a0.convert("and", "ax", capitalProvider));
     }
 
     @Test
@@ -60,7 +60,7 @@ class A0ShapefileTest {
                 .withDisplayClass(7)
                 .withPoint(new Point(new LiteCoordinateSequence(6.1311, 49.6045), new GeometryFactory()))));
 
-        String convert = a0Shapefile.convert("lux", "ax", capitalProvider);
+        String convert = a0.convert("lux", "ax", capitalProvider);
 
         PbfContent pbfContent = read(convert);
 

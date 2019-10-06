@@ -2,7 +2,6 @@ package fr.ignishky.fma.generator.reader;
 
 import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -23,8 +22,7 @@ public class ShapefileIterator implements Iterator<Feature>, Closeable {
         try {
             dataStore = new ShapefileDataStore(path.toFile().toURI().toURL());
             FeatureSource<SimpleFeatureType, SimpleFeature> source = dataStore.getFeatureSource(dataStore.getTypeNames()[0]);
-            FeatureCollection<SimpleFeatureType, SimpleFeature> collection = source.getFeatures(INCLUDE);
-            features = collection.features();
+            features = source.getFeatures(INCLUDE).features();
         } catch (IOException e) {
             throw new IllegalStateException("Could not read shapefile.", e);
         }

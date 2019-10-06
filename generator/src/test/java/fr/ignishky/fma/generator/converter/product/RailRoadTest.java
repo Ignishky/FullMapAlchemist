@@ -15,21 +15,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-class RailRoadShapefileTest {
+class RailRoadTest {
 
     private final NameProvider nameProvider = mock(NameProvider.class);
 
-    private final RailRoadShapefile railRoadShapefile = new RailRoadShapefile(new File(RESOURCES_INPUT), nameProvider, new File(TARGET_GENERATOR));
+    private final RailRoad railRoad = new RailRoad(new File(RESOURCES_INPUT), nameProvider, new File(TARGET_GENERATOR));
 
     @Test
     void should_throw_IllegalStateException_when_rail_road_shapefile_missing_in_ax_folder() {
-        assertThrows(IllegalStateException.class, () -> railRoadShapefile.convert("and", "and"));
+        assertThrows(IllegalStateException.class, () -> railRoad.convert("and", "and"));
     }
 
     @Test
     void should_convert_rr_shapefile_to_OSM_format() {
 
-        String convert = railRoadShapefile.convert("lux", "lux", null);
+        String convert = railRoad.convert("lux", "lux", null);
 
         List<Way> ways = read(convert).getWays();
 
