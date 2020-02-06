@@ -13,7 +13,7 @@ It's divided into 3 modules :
 
 ## Requirements
 
-To compile the code, you need : **Java 8+**
+To compile the code, you need : **Java 11+**
 
 To build the project, you need : **Maven 3.4+**
 
