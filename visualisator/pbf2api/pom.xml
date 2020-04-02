@@ -14,6 +14,7 @@
 
     <properties>
         <osmosis.version>0.45</osmosis.version>
+        <maven.version.rules>file:///${project.basedir}/../../config/versions-rules.xml</maven.version.rules>
     </properties>
 
     <dependencies>
@@ -24,7 +25,7 @@
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>geo</artifactId>
-            <version>0.7.6</version>
+            <version>0.7.7</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

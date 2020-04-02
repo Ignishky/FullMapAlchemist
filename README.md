@@ -9,7 +9,7 @@ It's divided into 3 modules :
 
 - [Preparator](https://github.com/Ignishky/FullMapAlchemist/tree/master/preparator) : To download and extract necessary files
 - [Generator](https://github.com/Ignishky/FullMapAlchemist/tree/master/generator) : To convert and fusion files into one .osm.pbf file
-- Visualisator : To guide user into using OSM tools with generated file
+- [Visualisator](https://github.com/Ignishky/FullMapAlchemist/tree/master/visualisator) : To guide user into using OSM tools with generated file
 
 ## Requirements
 
