@@ -4,7 +4,7 @@ import com.vividsolutions.jts.geom.Point;
 import fr.ignishky.fma.generator.reader.Feature;
 import lombok.AllArgsConstructor;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import static fr.ignishky.fma.generator.reader.Feature.Attribute.ADMINCLASS;
 import static fr.ignishky.fma.generator.reader.Feature.Attribute.CITYTYP;
@@ -13,7 +13,7 @@ import static fr.ignishky.fma.generator.reader.Feature.Attribute.NAME;
 import static fr.ignishky.fma.generator.reader.Feature.Attribute.POSTCODE;
 
 @Value
-@Wither
+@With
 @AllArgsConstructor
 public class Centroid {
 

@@ -40,7 +40,7 @@ public class ArchiveDownloader implements Function<Content, File> {
         File downloaded = new File(outputFolder, name);
 
         if (downloaded.exists()) {
-            log.info("File {} already present", downloaded.getName());
+            log.info("Archive {} already present", downloaded.getName());
             return downloaded;
         }
 

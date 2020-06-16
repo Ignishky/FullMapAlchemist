@@ -3,14 +3,14 @@ package fr.ignishky.fma.generator.merger;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Wither;
+import lombok.With;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
 
 import static com.google.common.base.Preconditions.checkState;
 
 @Data
-@Wither
+@With
 @AllArgsConstructor
 @NoArgsConstructor
 public class EntityMergeResult {

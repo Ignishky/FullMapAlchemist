@@ -50,15 +50,19 @@ public class ShapefileExtractor {
                 String filename = Paths.get(entry.getName()).getFileName().toString();
 
                 if (allFilesFrom(product).anyMatch(filename::contains)) {
-                    log.info("Extracting {}", filename);
-                    byte[] content = new byte[(int) entry.getSize()];
-                    archive.read(content, 0, content.length);
                     File zoneDirectory = Paths.get(outputFolder.getAbsolutePath(), countryCode, zone).toFile();
                     zoneDirectory.mkdirs();
                     File outputFile = Paths.get(zoneDirectory.getAbsolutePath(), filename.replace(".gz", "")).toFile();
-                    try (GZIPInputStream input = new GZIPInputStream(new ByteArrayInputStream(content));
-                         FileOutputStream output = new FileOutputStream(outputFile)) {
-                        IOUtils.copy(input, output);
+                    if (outputFile.exists()) {
+                        log.info("File {} already present", outputFile.getName());
+                    } else {
+                        log.info("Extracting {}", filename);
+                        byte[] content = new byte[(int) entry.getSize()];
+                        archive.read(content, 0, content.length);
+                        try (GZIPInputStream input = new GZIPInputStream(new ByteArrayInputStream(content));
+                             FileOutputStream output = new FileOutputStream(outputFile)) {
+                            IOUtils.copy(input, output);
+                        }
                     }
                 }
             }
