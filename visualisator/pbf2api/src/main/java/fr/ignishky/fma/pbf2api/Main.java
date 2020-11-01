@@ -56,7 +56,7 @@ public final class Main {
     public static void main(String[] args) {
         checkArgument(args.length == 1, "Usage : Main <splitterFolder>");
 
-        SplitAreas kml = new SplitAreas();
+        SplitAreas splitter = new SplitAreas();
         LoadingCache<String, SingleSplitFile> cache = CacheBuilder.newBuilder().maximumSize(4).build(new CacheLoader<String, SingleSplitFile>() {
             @Override
             public SingleSplitFile load(String key) {
@@ -82,28 +82,31 @@ public final class Main {
             log.debug("Calling /api/0.6/map?bbox={}", req.queryParams("bbox"));
             res.type(APPLICATION_XML);
             BoundingBox boundingBox = createBBox(req.queryParams("bbox"));
-            return xml(new BoundingBoxFilter().filter(splittedFile(cache, kml.file(boundingBox)), boundingBox));
+            return xml(new BoundingBoxFilter().filter(splittedFile(cache, splitter.file(boundingBox)), boundingBox));
         });
 
         get("/api/0.6/node/:id", (req, res) -> {
+            log.debug("Calling /api/0.6/node/{}", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            return xml(new NodeContainer(cache.get(kml.file(id)).getNodeById(id)));
+            return xml(new NodeContainer(cache.get(splitter.file(id)).getNodeById(id)));
         });
 
         get("/api/0.6/node/:id/ways", (req, res) -> {
+            log.debug("Calling /api/0.6/node/{}/ways", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            return xml(streamIterator(cache.get(kml.file(id)).getWays())
+            return xml(streamIterator(cache.get(splitter.file(id)).getWays())
                     .filter(way -> way.getWayNodes().stream().map(WayNode::getNodeId).collect(toSet()).contains(id))
                     .map(WayContainer::new)
                     .collect(toList()));
         });
 
         get("/api/0.6/way/:id", (req, res) -> {
+            log.debug("Calling /api/0.6/way/{}", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            Optional<Way> way = streamIterator(cache.get(kml.file(id)).getWays()).filter(w -> w.getId() == id).findFirst();
+            Optional<Way> way = streamIterator(cache.get(splitter.file(id)).getWays()).filter(w -> w.getId() == id).findFirst();
             if (way.isPresent()) {
                 return xml(new WayContainer(way.get()));
 
@@ -114,9 +117,10 @@ public final class Main {
         });
 
         get("/api/0.6/way/:id/relations", (req, res) -> {
+            log.debug("Calling /api/0.6/way/{}/relations", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            return xml(streamIterator(cache.get(kml.file(id)).getRelations())
+            return xml(streamIterator(cache.get(splitter.file(id)).getRelations())
                     .filter(rel -> rel.getMembers().stream()
                             .filter(member -> member.getMemberType() == Way)
                             .map(RelationMember::getMemberId)
@@ -127,9 +131,10 @@ public final class Main {
         });
 
         get("/api/0.6/relation/:id", (req, res) -> {
+            log.debug("Calling /api/0.6/relation/{}", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            Optional<Relation> relation = streamIterator(cache.get(kml.file(id)).getRelations()).filter(rel -> rel.getId() == id).findFirst();
+            Optional<Relation> relation = streamIterator(cache.get(splitter.file(id)).getRelations()).filter(rel -> rel.getId() == id).findFirst();
             if (relation.isPresent()) {
                 return xml(new RelationContainer(relation.get()));
 
@@ -140,9 +145,10 @@ public final class Main {
         });
 
         get("/api/0.6/relation/:id/full", (req, res) -> {
+            log.debug("Calling /api/0.6/relation/{}/full", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            SingleSplitFile file = cache.get(kml.file(id));
+            SingleSplitFile file = cache.get(splitter.file(id));
             Optional<Relation> relation = streamIterator(file.getRelations()).filter(rel -> rel.getId() == id).findFirst();
             if (relation.isPresent()) {
                 EntityContainer rel = new RelationContainer(relation.get());
@@ -151,7 +157,7 @@ public final class Main {
                         .map(RelationMember::getMemberId)
                         .map(geohash -> {
                             try {
-                                return streamIterator(cache.get(kml.file(geohash)).getWays()).filter(w -> w.getId() == geohash).findFirst();
+                                return streamIterator(cache.get(splitter.file(geohash)).getWays()).filter(w -> w.getId() == geohash).findFirst();
 
                             } catch (ExecutionException e) {
                                 throw new IllegalStateException(e);
@@ -162,7 +168,7 @@ public final class Main {
                             try {
                                 List<EntityContainer> containers = Lists.newArrayList();
                                 for (WayNode wn : o.get().getWayNodes()) {
-                                    containers.add(new NodeContainer(cache.get(kml.file(wn.getNodeId())).getNodeById(wn.getNodeId())));
+                                    containers.add(new NodeContainer(cache.get(splitter.file(wn.getNodeId())).getNodeById(wn.getNodeId())));
                                 }
                                 containers.add(new WayContainer(o.get()));
                                 return containers.stream();
@@ -188,11 +194,18 @@ public final class Main {
 
     private static BoundingBox createBBox(String input) {
         String[] split = input.split(",");
-        double lat1 = parseDouble(split[1]);
-        double lat2 = parseDouble(split[3]);
         double lng1 = parseDouble(split[0]);
+        double lat1 = parseDouble(split[1]);
         double lng2 = parseDouble(split[2]);
+        double lat2 = parseDouble(split[3]);
         return new BoundingBox(min(lat1, lat2), min(lng1, lng2), max(lat1, lat2), max(lng1, lng2));
+    }
+
+    private static SplitFile splittedFile(LoadingCache<String, SingleSplitFile> cache, List<String> fileNames) throws ExecutionException {
+        if (fileNames.size() == 1) {
+            return cache.get(fileNames.get(0));
+        }
+        return new MultiSplitFile(cache.get(fileNames.get(0)), splittedFile(cache, fileNames.subList(1, fileNames.size())));
     }
 
     private static <T> Stream<T> streamIterator(Iterator<T> it) {
@@ -219,12 +232,5 @@ public final class Main {
         osmWriter.process(container);
         osmWriter.end();
         return stringWriter.toString();
-    }
-
-    private static SplitFile splittedFile(LoadingCache<String, SingleSplitFile> cache, List<String> fileNames) throws ExecutionException {
-        if (fileNames.size() == 1) {
-            return cache.get(fileNames.get(0));
-        }
-        return new MultiSplitFile(cache.get(fileNames.get(0)), splittedFile(cache, fileNames.subList(1, fileNames.size())));
     }
 }

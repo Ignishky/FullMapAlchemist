@@ -23,6 +23,11 @@ Mandatory : a data generation must have been done.
 ```bash
 docker run --rm -v /path/to/splitter/directory:/splitter -p 9090:9090 -t ignishky/fma_pbf2api /splitter
 ```
+To verify that the server is correctly running, the next command should return a XML.
+```bash
+curl http://localhost:9090/api/capabilities
+```
+
 ## iDeditor
 
 ### Download

@@ -54,11 +54,11 @@ public class CountryConverter {
                 .map(zoneCode -> zone.convert(countryCode, zoneCode, capitalProvider))
                 .collect(toList());
 
-        Path outputFile = Paths.get(outputFolder.getPath(), countryCode, countryCode + ".osm.pbf");
+        Path countryFile = Paths.get(outputFolder.getPath(), countryCode, countryCode + ".osm.pbf");
 
-        osmMerger.merge(convertedZoneFiles, outputFile);
+        osmMerger.merge(convertedZoneFiles, countryFile);
         log.info("Country {} generated in {} ms", countryCode, watch.getTime());
 
-        return outputFile.toString();
+        return countryFile.toString();
     }
 }

@@ -21,16 +21,16 @@ import java.util.stream.Stream;
 import static fr.ignishky.fma.preparator.utils.Constants.PATTERN_7ZIP_FILE;
 import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 public class ContentDownloader implements Function<Release, Stream<Content>> {
 
-    private static final List<String> ALLOWED = singletonList("mn");
-    private static final List<String> COUNTRIES = asList("alb", "and", "arm", "aut", "aze", "bel", "bgr", "bih", "blr", "che", "cyp", "cze", "deu",
-            "dnk", "esp", "fra", "ita", "lux", "nld");
+    private static final List<String> ALLOWED = List.of("mn");
+    private static final List<String> COUNTRIES = List.of("alb", "and", "arm", "aut", "aze", "bel", "bgr", "bih", "blr", "che",
+            "cyp", "cze", "deu", "dnk", "esp", "est", "fin", "fra", "fro", "gbr", "geo", "gib", "grc", "grl", "hrv", "hun",
+            "irl", "isl", "ita", "lie", "ltu", "lux", "lva", "mco", "mda", "mkd", "mlt", "mne", "nld", "nor", "pol", "prt",
+            "rou", "smr", "srb", "svk", "svn", "swe", "tur", "ukr", "vat", "xks");
 
     private final HttpClient client;
     private final String token;

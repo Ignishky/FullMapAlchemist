@@ -24,6 +24,8 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 @Slf4j
 public class ReleaseDownloader implements Function<Product, Stream<Release>> {
 
+    private static final Gson GSON = new Gson();
+
     private final String version;
     private final HttpClient client;
     private final String token;
@@ -46,7 +48,7 @@ public class ReleaseDownloader implements Function<Product, Stream<Release>> {
 
         try (InputStream response = client.execute(get).getEntity().getContent()) {
 
-            return new Gson().fromJson(IOUtils.toString(response, UTF_8), Releases.class).getContent().stream()
+            return GSON.fromJson(IOUtils.toString(response, UTF_8), Releases.class).getContent().stream()
                     .filter(release -> version.equals(release.getVersion()));
 
         } catch (IOException e) {

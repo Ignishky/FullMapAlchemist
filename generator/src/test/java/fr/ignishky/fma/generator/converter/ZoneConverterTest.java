@@ -6,32 +6,51 @@ import fr.ignishky.fma.generator.converter.product.WaterArea;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.merger.OsmMerger;
 import fr.ignishky.fma.generator.split.Splitter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static fr.ignishky.fma.generator.utils.TestConstants.RESOURCES_INPUT;
 import static fr.ignishky.fma.generator.utils.TestConstants.TARGET_GENERATOR;
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 class ZoneConverterTest {
 
-    private final A0 a0 = mock(A0.class);
-    private final RailRoad railRoad = mock(RailRoad.class);
-    private final WaterArea waterArea = mock(WaterArea.class);
-    private final OsmMerger osmMerger = mock(OsmMerger.class);
-    private final Splitter splitter = mock(Splitter.class);
-    private final CapitalProvider capitalProvider = mock(CapitalProvider.class);
+    @Mock
+    private A0 a0;
+    @Mock
+    private RailRoad railRoad;
+    @Mock
+    private WaterArea waterArea;
+    @Mock
+    private OsmMerger osmMerger;
+    @Mock
+    private Splitter splitter ;
+    @Mock
+    private CapitalProvider capitalProvider;
+    @Captor
+    private ArgumentCaptor<List<String>> argumentCaptor;
 
-    private final ZoneConverter zoneConverter = new ZoneConverter(new File(RESOURCES_INPUT), new File(TARGET_GENERATOR),
-            a0, railRoad, waterArea, osmMerger, splitter);
+    private ZoneConverter zoneConverter;
+
+    @BeforeEach
+    public void init(){
+        initMocks(this);
+
+        zoneConverter = new ZoneConverter(new File(RESOURCES_INPUT), new File(TARGET_GENERATOR), a0, railRoad, waterArea, osmMerger, splitter);
+    }
 
     @Test
     void should_throw_IllegalArgumentException_when_inputFolder_is_not_a_valid_directory() {
@@ -55,7 +74,7 @@ class ZoneConverterTest {
 
         String zonePbfFileName = "target/generator/lux/ax/ax.osm.pbf";
         verify(splitter).split(Paths.get(zonePbfFileName));
-        verify(osmMerger).merge(asList(productPbfFileName), Paths.get(zonePbfFileName));
+        verify(osmMerger).merge(List.of(productPbfFileName), Paths.get(zonePbfFileName));
 
         assertThat(generate).isEqualTo(zonePbfFileName);
     }
@@ -71,7 +90,8 @@ class ZoneConverterTest {
 
         String zonePbfFileName = "target/generator/lux/lux/lux.osm.pbf";
         verify(splitter).split(Paths.get(zonePbfFileName));
-        verify(osmMerger).merge(asList(rrPbfFileName, waPbfFileName), Paths.get(zonePbfFileName));
+        verify(osmMerger).merge(argumentCaptor.capture(), eq(Paths.get(zonePbfFileName)));
+        assertThat(argumentCaptor.getValue()).containsOnly(waPbfFileName, rrPbfFileName);
 
         assertThat(generate).isEqualTo(zonePbfFileName);
     }

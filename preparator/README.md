@@ -2,12 +2,18 @@
 
 ## Build
 
-`mvn clean install`
+```
+mvn clean install
+```
 
 ## Generate Docker image
 
-`docker build -t ignishky/fma_preparator ./preparator`
+```
+docker build -t ignishky/fma_preparator ./preparator
+```
 
 ## Run
 
-`docker run --rm -v /tmp/files:/workspace -t ignishky/fma_preparator /workspace <yourToken> <version>`
+```
+docker run --rm -v /tmp/files:/workspace -t ignishky/fma_preparator /workspace <yourToken> <version>
+```

@@ -48,5 +48,7 @@ public class Main {
                 .flatMap(contentDownloader)
                 .map(archiveDownloader)
                 .forEach(shapefileExtractor::decompress);
+
+        log.info("All files have been downloaded.");
     }
 }

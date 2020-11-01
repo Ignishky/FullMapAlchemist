@@ -19,13 +19,13 @@ import java.util.stream.Stream;
 
 import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 public class ProductsDownloader implements Function<Family, Stream<Product>> {
 
-    private static final List<String> ALLOWED = singletonList("EUR");
+    private static final List<String> ALLOWED = List.of("EUR");
+    private static final Gson GSON = new Gson();
 
     private final HttpClient client;
     private final String token;
@@ -47,7 +47,7 @@ public class ProductsDownloader implements Function<Family, Stream<Product>> {
 
         try (InputStream response = client.execute(get).getEntity().getContent()) {
 
-            return new Gson().fromJson(IOUtils.toString(response, UTF_8), Products.class).getContent().stream()
+            return GSON.fromJson(IOUtils.toString(response, UTF_8), Products.class).getContent().stream()
                     .filter(product -> ALLOWED.contains(product.getName()));
 
         } catch (IOException e) {

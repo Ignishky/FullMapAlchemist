@@ -1,6 +1,6 @@
 # FullMapAlchemist
 
-![Java CI](https://github.com/Ignishky/FullMapAlchemist/workflows/Java%20CI/badge.svg)
+[![Java CI](https://github.com/Ignishky/FullMapAlchemist/workflows/Java%20CI/badge.svg)]()
 [![Build Status](https://travis-ci.com/Ignishky/FullMapAlchemist.svg?token=yU7cS6vFNuj477t5rJws&branch=master)](https://travis-ci.org/ignishky/FullMapAlchemist)
 [![GitHub release](https://img.shields.io/github/release/ignishky/FullMapAlchemist.svg)]()
 

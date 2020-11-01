@@ -42,8 +42,12 @@ public class Main {
 
     void run() {
 
-        List<String> countryCodes = stream(inputFolder.list()).filter(code -> !code.endsWith("7z.001")).collect(toList());
+        File[] files = inputFolder.listFiles();
+        if (files == null) {
+            throw new IllegalArgumentException("<inputFolder> must be accessible.");
+        }
 
+        List<String> countryCodes = stream(files).filter(File::isDirectory).map(File::getName).collect(toList());
         if (countryCodes.isEmpty()) {
             throw new IllegalArgumentException("<inputFolder> must be a valid non-empty directory.");
         }
@@ -51,9 +55,9 @@ public class Main {
         log.info("Generating Europe file with countries : {}", countryCodes);
         StopWatch watch = StopWatch.createStarted();
 
-        List<String> convertedCountries = countryCodes.stream().map(country::convert).collect(toList());
+        List<String> countries = countryCodes.stream().map(country::convert).collect(toList());
 
-        osmMerger.merge(convertedCountries, Paths.get(outputFolder.getPath(), "Europe.osm.pbf"));
+        osmMerger.merge(countries, Paths.get(outputFolder.getPath(), "Europe.osm.pbf"));
 
         log.info("Europe.osm.pbf generated in {} ms", watch.getTime());
     }

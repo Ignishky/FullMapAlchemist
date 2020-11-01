@@ -11,7 +11,6 @@ public class Releases {
 
     @Value
     public static class Release {
-
         String version;
         String location;
     }

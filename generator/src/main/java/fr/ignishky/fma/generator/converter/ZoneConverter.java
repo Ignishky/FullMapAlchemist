@@ -29,7 +29,7 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 class ZoneConverter {
 
-    private static final Pattern PATTERN_PRODUCT_FILE = Pattern.compile("^\\w{6}___________(.*)\\.[a-z]{3}");
+    private static final Pattern PATTERN_PRODUCT_FILE = Pattern.compile("^(\\w{6}|\\w{3}___)___________(.*)\\.[a-z]{3}");
 
     private final File inputFolder;
     private final File outputFolder;

@@ -17,14 +17,14 @@ import java.util.stream.Stream;
 
 import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singletonList;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 public class FamiliesDownloader {
 
     public static final String FAMILIES_URL = "https://api.tomtom.com/mcapi/families";
-    private static final List<String> ALLOWED = singletonList("MN");
+    private static final List<String> ALLOWED = List.of("MN");
+    private static final Gson GSON = new Gson();
 
     private final HttpClient client;
     private final String token;
@@ -43,7 +43,7 @@ public class FamiliesDownloader {
 
         try (InputStream response = client.execute(get).getEntity().getContent()) {
 
-            return new Gson().fromJson(IOUtils.toString(response, UTF_8), Families.class).getContent().stream() //
+            return GSON.fromJson(IOUtils.toString(response, UTF_8), Families.class).getContent().stream()
                     .filter(family -> ALLOWED.contains(family.getAbbreviation()));
 
         } catch (IOException e) {

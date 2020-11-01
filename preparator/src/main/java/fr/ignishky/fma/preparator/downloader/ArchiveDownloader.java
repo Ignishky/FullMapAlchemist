@@ -24,6 +24,8 @@ import static org.apache.http.HttpHeaders.AUTHORIZATION;
 @Slf4j
 public class ArchiveDownloader implements Function<Content, File> {
 
+    private static final Gson GSON = new Gson();
+
     private final File outputFolder;
     private final HttpClient client;
     private final String token;
@@ -51,9 +53,9 @@ public class ArchiveDownloader implements Function<Content, File> {
         log.info("Get redirect URL for {} ({})", name, archiveUrl);
         try (InputStream redirect = client.execute(get).getEntity().getContent()) {
 
-            String redirectUrl = new Gson().fromJson(IOUtils.toString(redirect, UTF_8), Redirect.class).getUrl();
+            String redirectUrl = GSON.fromJson(IOUtils.toString(redirect, UTF_8), Redirect.class).getUrl();
 
-            log.debug("Downloading {} to {}", redirectUrl, downloaded.getAbsolutePath());
+            log.debug("Downloading {}", downloaded.getAbsolutePath());
             try (InputStream archive = client.execute(new HttpGet(redirectUrl)).getEntity().getContent()) {
                 copyInputStreamToFile(archive, downloaded);
             }

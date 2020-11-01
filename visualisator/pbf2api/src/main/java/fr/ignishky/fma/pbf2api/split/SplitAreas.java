@@ -18,7 +18,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SplitAreas {
 
-    private static final GeometryFactory gf = new GeometryFactory();
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
     private final STRtree tree;
 
@@ -58,6 +58,6 @@ public class SplitAreas {
     }
 
     private static Envelope point(double x, double y) {
-        return gf.createPoint(new Coordinate(x, y)).getEnvelopeInternal();
+        return GEOMETRY_FACTORY.createPoint(new Coordinate(x, y)).getEnvelopeInternal();
     }
 }
