@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static java.lang.String.format;
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.exists;
 
 @Slf4j
 public abstract class Shapefile {
@@ -35,14 +37,18 @@ public abstract class Shapefile {
 
     public String convert(String countryCode, String zoneCode, CapitalProvider capitalProvider) {
 
+        Path outputZoneFile = getOutputFile(countryCode, zoneCode);
+        if (exists(outputZoneFile)) {
+            log.info("File {} already present.", outputZoneFile.toString());
+            return outputZoneFile.toString();
+        }
+
         log.info("Generate product '{}' for zone '{}-{}'", getProductName(), countryCode, zoneCode);
         StopWatch watch = StopWatch.createStarted();
 
         if (getNameFile(countryCode) != null) {
             nameProvider.loadAlternateNames(Paths.get(inputFolder.getPath(), countryCode, zoneCode, getNameFile(countryCode)));
         }
-
-        Path outputZoneFile = getOutputFile(countryCode, zoneCode);
 
         try (GeometrySerializer serializer = new OsmosisSerializer(outputZoneFile);
              ShapefileIterator iterator = getShapefileIterator(countryCode, zoneCode)) {
@@ -60,7 +66,12 @@ public abstract class Shapefile {
 
     private Path getOutputFile(String countryCode, String zoneCode) {
         Path outputZoneFolder = Paths.get(outputFolder.getPath(), countryCode, zoneCode, "products");
-        if(!outputZoneFolder.toFile().exists() && !outputZoneFolder.toFile().mkdirs()) {
+        try {
+            createDirectories(outputZoneFolder);
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to create folder " + outputZoneFolder);
+        }
+        if (!exists(outputZoneFolder)) {
             throw new IllegalStateException("Unable to create folder " + outputZoneFolder);
         }
         return outputZoneFolder.resolve(getOutputFileName());
@@ -69,7 +80,7 @@ public abstract class Shapefile {
     private ShapefileIterator getShapefileIterator(String countryCode, String zoneCode) {
 
         Path inputShapefile = Paths.get(inputFolder.getPath(), countryCode, zoneCode, getInputFile(countryCode, zoneCode));
-        if (!inputShapefile.toFile().exists()) {
+        if (!exists(inputShapefile)) {
             throw new IllegalStateException("Missing file " + inputShapefile);
         }
         log.info("Reading SHP {}", inputShapefile);

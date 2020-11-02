@@ -23,13 +23,14 @@ import java.util.regex.Pattern;
 import static fr.ignishky.fma.generator.utils.Constants.INPUT_FOLDER;
 import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
 import static java.lang.String.format;
+import static java.nio.file.Files.exists;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toSet;
 
 @Slf4j
 class ZoneConverter {
 
-    private static final Pattern PATTERN_PRODUCT_FILE = Pattern.compile("^(\\w{6}|\\w{3}___)___________(.*)\\.[a-z]{3}");
+    private static final Pattern PATTERN_PRODUCT_FILE = Pattern.compile("^(\\w{6}|\\w{3}___)___________(.*)\\.shp");
 
     private final File inputFolder;
     private final File outputFolder;
@@ -52,6 +53,12 @@ class ZoneConverter {
     }
 
     public String convert(String countryCode, String zoneCode, CapitalProvider capitalProvider) {
+        Path outputFile = Paths.get(outputFolder.getPath(), countryCode, zoneCode, zoneCode + ".osm.pbf");
+        if (exists(outputFile)) {
+            log.info("File {} already exists.", outputFile.toString());
+            return outputFile.toString();
+        }
+
         String[] products = Paths.get(inputFolder.getPath(), countryCode, zoneCode).toFile().list();
 
         if (products == null || products.length == 0) {
@@ -67,10 +74,9 @@ class ZoneConverter {
             convertFiles.add(a0.convert(countryCode, zoneCode, capitalProvider));
         } else {
             convertFiles.add(railRoad.convert(countryCode, zoneCode));
-            convertFiles.add(waterArea.convert(countryCode, zoneCode));
+            //  convertFiles.add(waterArea.convert(countryCode, zoneCode));
         }
 
-        Path outputFile = Paths.get(outputFolder.getPath(), countryCode, zoneCode, zoneCode + ".osm.pbf");
         osmMerger.merge(convertFiles, outputFile);
 
         splitter.split(outputFile);
@@ -83,7 +89,7 @@ class ZoneConverter {
         return stream(products)
                 .map(PATTERN_PRODUCT_FILE::matcher)
                 .filter(Matcher::matches)
-                .map(matcher -> matcher.group(1))
+                .map(matcher -> matcher.group(2))
                 .collect(toSet());
     }
 }

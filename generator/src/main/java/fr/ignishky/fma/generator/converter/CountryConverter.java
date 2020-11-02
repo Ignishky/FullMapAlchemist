@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -39,6 +40,12 @@ public class CountryConverter {
 
     public String convert(String countryCode) {
 
+        Path countryFile = Paths.get(outputFolder.getPath(), countryCode, countryCode + ".osm.pbf");
+        if(Files.exists(countryFile)) {
+            log.info("File {} already exists.", countryFile.toString());
+            return countryFile.toString();
+        }
+
         String[] zones = Paths.get(inputFolder.getPath(), countryCode).toFile().list();
 
         if (zones == null || zones.length == 0) {
@@ -53,8 +60,6 @@ public class CountryConverter {
         List<String> convertedZoneFiles = stream(zones)
                 .map(zoneCode -> zone.convert(countryCode, zoneCode, capitalProvider))
                 .collect(toList());
-
-        Path countryFile = Paths.get(outputFolder.getPath(), countryCode, countryCode + ".osm.pbf");
 
         osmMerger.merge(convertedZoneFiles, countryFile);
         log.info("Country {} generated in {} ms", countryCode, watch.getTime());
