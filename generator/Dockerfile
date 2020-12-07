@@ -1,4 +1,4 @@
-FROM openjdk:14-alpine
+FROM adoptopenjdk:11.0.8_10-jre-hotspot
 
 VOLUME /workspace
 WORKDIR /workspace

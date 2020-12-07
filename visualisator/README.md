@@ -13,7 +13,7 @@ Due to large file, you could be oblige to increase -Xmx as explain in the link a
 ### Build
 
 ```bash
-docker build -t ignishky/fma_pbf2api ./pbf2api 
+docker build -t ignishky/fma_pbf2api ./visualisator/pbf2api 
 ```
 
 ### Run
