@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.LineString;
 import fr.ignishky.fma.generator.converter.dbf.NameProvider;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.reader.Feature;
-import fr.ignishky.fma.generator.writer.GeometrySerializer;
+import fr.ignishky.fma.generator.writer.OsmosisSerializer;
 
 import java.io.File;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class RailRoad extends Shapefile {
     }
 
     @Override
-    protected void serialize(GeometrySerializer serializer, Feature feature, CapitalProvider capitalProvider) {
+    protected void serialize(OsmosisSerializer serializer, Feature feature, CapitalProvider capitalProvider) {
         Map<String, String> tags = new HashMap<>(2);
         tags.put("railway", "rail");
         if (feature.getInt(PARTSTRUC) == TUNNEL) {

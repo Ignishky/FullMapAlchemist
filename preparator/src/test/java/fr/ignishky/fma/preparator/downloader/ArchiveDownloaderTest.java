@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import static fr.ignishky.fma.preparator.utils.Constants.TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -32,7 +32,7 @@ class ArchiveDownloaderTest {
 
         when(client.execute(any(HttpGet.class))).thenThrow(new IOException("Archive Test Exception"));
 
-        assertThrows(IllegalStateException.class, () -> archiveDownloader.apply(new Content("fake.7z.001", "loc")));
+        assertThatIllegalStateException().isThrownBy(() -> archiveDownloader.apply(new Content("fake.7z.001", "loc")));
     }
 
     @Test
@@ -53,7 +53,7 @@ class ArchiveDownloaderTest {
 
     @Test
     void should_do_nothing_when_file_already_present() throws Exception {
-        File expected = Files.createTempFile(Paths.get("target"), "test", "").toFile();
+        File expected = Files.createTempFile(Path.of("target"), "test", "").toFile();
 
         File file = archiveDownloader.apply(new Content(expected.getName(), "loc"));
 

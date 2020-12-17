@@ -79,7 +79,7 @@ class ZoneConverterTest {
         assertThat(generate).isEqualTo(zonePbfFileName);
     }
 
-    //@Test
+    @Test
     void should_convert_and_split_railroad_shapefile_for_none_ax_zone() {
         String rrPbfFileName = "convertRrLux.osm.pbf";
         when(railRoad.convert("lux", "lux")).thenReturn(rrPbfFileName);

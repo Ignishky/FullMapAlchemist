@@ -9,8 +9,8 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,7 +42,7 @@ class EntityMergeResultTest {
     }
 
     private static EntityContainer node(int id, Tag... tags) {
-        return container(withData(id, newArrayList(tags), new Node(new CommonEntityData(id, id, (Date) null, null, id), 0.0, 0.0)));
+        return container(withData(id, List.of(tags), new Node(new CommonEntityData(id, id, (Date) null, null, id), 0.0, 0.0)));
     }
 
     private static EntityContainer container(Entity entity) {

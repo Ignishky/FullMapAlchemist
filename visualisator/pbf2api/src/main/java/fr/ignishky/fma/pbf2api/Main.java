@@ -3,7 +3,6 @@ package fr.ignishky.fma.pbf2api;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
 import fr.ignishky.fma.pbf2api.api.BoundingBox;
 import fr.ignishky.fma.pbf2api.api.BoundingBoxFilter;
 import fr.ignishky.fma.pbf2api.split.MultiSplitFile;
@@ -25,6 +24,7 @@ import spark.Response;
 import spark.utils.IOUtils;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -82,21 +82,21 @@ public final class Main {
             log.debug("Calling /api/0.6/map?bbox={}", req.queryParams("bbox"));
             res.type(APPLICATION_XML);
             BoundingBox boundingBox = createBBox(req.queryParams("bbox"));
-            return xml(new BoundingBoxFilter().filter(splittedFile(cache, splitter.file(boundingBox)), boundingBox));
+            return xml(new BoundingBoxFilter().filter(splittedFile(cache, splitter.getFiles(boundingBox)), boundingBox));
         });
 
         get("/api/0.6/node/:id", (req, res) -> {
             log.debug("Calling /api/0.6/node/{}", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            return xml(new NodeContainer(cache.get(splitter.file(id)).getNodeById(id)));
+            return xml(new NodeContainer(cache.get(splitter.getFile(id)).getNodeById(id)));
         });
 
         get("/api/0.6/node/:id/ways", (req, res) -> {
             log.debug("Calling /api/0.6/node/{}/ways", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            return xml(streamIterator(cache.get(splitter.file(id)).getWays())
+            return xml(streamIterator(cache.get(splitter.getFile(id)).getWays())
                     .filter(way -> way.getWayNodes().stream().map(WayNode::getNodeId).collect(toSet()).contains(id))
                     .map(WayContainer::new)
                     .collect(toList()));
@@ -106,7 +106,7 @@ public final class Main {
             log.debug("Calling /api/0.6/way/{}", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            Optional<Way> way = streamIterator(cache.get(splitter.file(id)).getWays()).filter(w -> w.getId() == id).findFirst();
+            Optional<Way> way = streamIterator(cache.get(splitter.getFile(id)).getWays()).filter(w -> w.getId() == id).findFirst();
             if (way.isPresent()) {
                 return xml(new WayContainer(way.get()));
 
@@ -120,7 +120,7 @@ public final class Main {
             log.debug("Calling /api/0.6/way/{}/relations", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            return xml(streamIterator(cache.get(splitter.file(id)).getRelations())
+            return xml(streamIterator(cache.get(splitter.getFile(id)).getRelations())
                     .filter(rel -> rel.getMembers().stream()
                             .filter(member -> member.getMemberType() == Way)
                             .map(RelationMember::getMemberId)
@@ -134,7 +134,7 @@ public final class Main {
             log.debug("Calling /api/0.6/relation/{}", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            Optional<Relation> relation = streamIterator(cache.get(splitter.file(id)).getRelations()).filter(rel -> rel.getId() == id).findFirst();
+            Optional<Relation> relation = streamIterator(cache.get(splitter.getFile(id)).getRelations()).filter(rel -> rel.getId() == id).findFirst();
             if (relation.isPresent()) {
                 return xml(new RelationContainer(relation.get()));
 
@@ -148,7 +148,7 @@ public final class Main {
             log.debug("Calling /api/0.6/relation/{}/full", req.params("id"));
             res.type(APPLICATION_XML);
             Long id = Long.valueOf(req.params("id"));
-            SingleSplitFile file = cache.get(splitter.file(id));
+            SingleSplitFile file = cache.get(splitter.getFile(id));
             Optional<Relation> relation = streamIterator(file.getRelations()).filter(rel -> rel.getId() == id).findFirst();
             if (relation.isPresent()) {
                 EntityContainer rel = new RelationContainer(relation.get());
@@ -157,7 +157,7 @@ public final class Main {
                         .map(RelationMember::getMemberId)
                         .map(geohash -> {
                             try {
-                                return streamIterator(cache.get(splitter.file(geohash)).getWays()).filter(w -> w.getId() == geohash).findFirst();
+                                return streamIterator(cache.get(splitter.getFile(geohash)).getWays()).filter(w -> w.getId() == geohash).findFirst();
 
                             } catch (ExecutionException e) {
                                 throw new IllegalStateException(e);
@@ -166,9 +166,9 @@ public final class Main {
                         .filter(Optional::isPresent)
                         .flatMap(o -> {
                             try {
-                                List<EntityContainer> containers = Lists.newArrayList();
+                                List<EntityContainer> containers = new ArrayList<>();
                                 for (WayNode wn : o.get().getWayNodes()) {
-                                    containers.add(new NodeContainer(cache.get(splitter.file(wn.getNodeId())).getNodeById(wn.getNodeId())));
+                                    containers.add(new NodeContainer(cache.get(splitter.getFile(wn.getNodeId())).getNodeById(wn.getNodeId())));
                                 }
                                 containers.add(new WayContainer(o.get()));
                                 return containers.stream();

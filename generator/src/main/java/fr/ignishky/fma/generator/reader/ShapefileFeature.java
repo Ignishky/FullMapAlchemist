@@ -11,7 +11,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Value
 public class ShapefileFeature implements Feature {
 
-    private final SimpleFeature feature;
+    SimpleFeature feature;
 
     public String getString(Attribute attr) {
         String attribute = (String) feature.getAttribute(attr.name());

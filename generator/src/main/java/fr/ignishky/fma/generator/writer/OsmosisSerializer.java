@@ -17,8 +17,8 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 
+import java.io.Closeable;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -32,44 +32,38 @@ import static fr.ignishky.fma.generator.helper.Geohash.encodeGeohash;
 import static fr.ignishky.fma.generator.helper.Layers.layer;
 import static fr.ignishky.fma.generator.utils.Constants.TAG_LAYER;
 import static java.time.Instant.now;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.openstreetmap.osmosis.core.domain.v0_6.EntityType.Node;
 import static org.openstreetmap.osmosis.core.domain.v0_6.EntityType.Way;
 
 @Slf4j
-public class OsmosisSerializer implements GeometrySerializer {
+public class OsmosisSerializer implements Closeable {
 
-    private final Instant date;
+    private static final OsmUser USER = new OsmUser(1, "Tomtom");
+    private final Collection<Long> pointTracker = new HashSet<>();
+    private final Collection<Long> wayTracker = new HashSet<>();
+    private final Collection<Long> relationTracker = new HashSet<>();
+
     private final Sink sink;
-    private final OsmUser user;
-    private final Collection<Long> pointTracker = new HashSet<>(10);
-    private final Collection<Long> wayTracker = new HashSet<>(10);
-    private final Collection<Long> relationTracker = new HashSet<>(10);
 
     public OsmosisSerializer(Path path) {
         sink = new PbfSink(path);
-        date = now();
-        user = new OsmUser(1, "Tomtom");
     }
 
-    @Override
     public Optional<Long> write(Point point, Map<String, String> tags) {
         long id = encodeGeohash(0, point.getCoordinate());
 
         if (pointTracker.contains(id)) {
             log.warn("Rejecting point {} with tags {} because already present.", id, tags);
-            return empty();
+            return Optional.empty();
         }
 
         pointTracker.add(id);
         sink.process(new NodeContainer(new Node(ced(id, tags), point.getY(), point.getX())));
 
-        return of(id);
+        return Optional.of(id);
     }
 
-    @Override
     public Optional<Long> write(LineString line, Map<String, String> tags) {
         long id = encodeGeohash(7, line.getCentroid().getCoordinate());
 
@@ -78,10 +72,9 @@ public class OsmosisSerializer implements GeometrySerializer {
             sink.process(new WayContainer(new Way(ced(id, tags), getLineNodes(line, tags))));
         }
 
-        return of(id);
+        return Optional.of(id);
     }
 
-    @Override
     public void write(List<RelationMember> members, Map<String, String> tags) {
         members.stream()
                 .filter(member -> isUnknownNode(member) || isUnknownWay(member))
@@ -100,8 +93,8 @@ public class OsmosisSerializer implements GeometrySerializer {
         sink.release();
     }
 
-    private CommonEntityData ced(long id, Map<String, String> tags) {
-        return new CommonEntityData(id, 1, Date.from(date), user, 1L,
+    private static CommonEntityData ced(long id, Map<String, String> tags) {
+        return new CommonEntityData(id, 1, Date.from(now()), USER, 1L,
                 tags.entrySet().stream().map(en -> new Tag(en.getKey(), en.getValue())).collect(toList()));
     }
 
@@ -131,7 +124,7 @@ public class OsmosisSerializer implements GeometrySerializer {
         long id = encodeGeohash(layer, coordinate);
         if (!pointTracker.contains(id)) {
             pointTracker.add(id);
-            sink.process(new NodeContainer(new Node(new CommonEntityData(id, 1, Date.from(date), user, 1L), coordinate.y, coordinate.x)));
+            sink.process(new NodeContainer(new Node(new CommonEntityData(id, 1, Date.from(now()), USER, 1L), coordinate.y, coordinate.x)));
         }
         return id;
     }

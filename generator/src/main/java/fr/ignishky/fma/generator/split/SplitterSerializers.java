@@ -11,7 +11,7 @@ import javax.inject.Named;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +29,7 @@ class SplitterSerializers {
 
     @Inject
     SplitterSerializers(@Named(OUTPUT_FOLDER) File outputFolder) {
-        parent = Paths.get(outputFolder.getPath(), "splitter").toString();
+        parent = Path.of(outputFolder.getPath(), "splitter").toString();
     }
 
     Sink serializer(int j) {
@@ -60,7 +60,7 @@ class SplitterSerializers {
             if (index.containsKey(filename)) {
                 return index.get(filename);
             }
-            File file = Paths.get(parent, filename, filename + ".osm.pbf").toFile();
+            File file = Path.of(parent, filename, filename + ".osm.pbf").toFile();
             file.getParentFile().mkdirs();
             BlockOutputStream os = new BlockOutputStream(new FileOutputStream(file));
             os.setCompress("none");

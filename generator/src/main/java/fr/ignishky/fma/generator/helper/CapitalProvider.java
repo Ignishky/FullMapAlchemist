@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -27,10 +27,10 @@ public class CapitalProvider {
     }
 
     public void init(String countryCode) {
-        log.info("Extract all capitals for country '{}'", countryCode);
+        log.info("Extracting all capitals for country '{}'", countryCode);
         capitals.clear();
 
-        File[] zoneDirectories = Paths.get(inputFolder.getAbsolutePath(), countryCode).toFile().listFiles();
+        File[] zoneDirectories = Path.of(inputFolder.getAbsolutePath(), countryCode).toFile().listFiles();
         if (zoneDirectories == null || zoneDirectories.length == 0) {
             throw new IllegalArgumentException(format("<inputFolder>/%s should be a non empty folder.", countryCode));
         }
@@ -56,7 +56,7 @@ public class CapitalProvider {
         }
     }
 
-    public Stream<Centroid> get(int tomtomLevel) {
+    public Stream<Centroid> forLevel(int tomtomLevel) {
         return capitals.stream().filter(city -> city.getAdminClass() <= tomtomLevel);
     }
 }

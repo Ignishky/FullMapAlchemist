@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import fr.ignishky.fma.generator.converter.dbf.NameProvider;
 import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.reader.Feature;
-import fr.ignishky.fma.generator.writer.GeometrySerializer;
+import fr.ignishky.fma.generator.writer.OsmosisSerializer;
 import org.openstreetmap.osmosis.core.domain.v0_6.RelationMember;
 
 import javax.inject.Inject;
@@ -53,7 +53,7 @@ public class WaterArea extends Shapefile {
     }
 
     @Override
-    protected void serialize(GeometrySerializer serializer, Feature feature, CapitalProvider capitalProvider) {
+    protected void serialize(OsmosisSerializer serializer, Feature feature, CapitalProvider capitalProvider) {
 
         if (feature.getInt(TYP) != 1) {
             Map<String, String> tags = new HashMap<>();

@@ -2,8 +2,6 @@ package fr.ignishky.fma.generator.converter.dbf;
 
 import lombok.Getter;
 
-import static java.util.Arrays.stream;
-
 public enum Language {
     AFR("af"),
     ALB("sq"),
@@ -165,12 +163,5 @@ public enum Language {
 
     Language(String value) {
         this.value = value;
-    }
-
-    public static Language fromValue(String name) {
-        return stream(Language.values())
-                .filter(v -> v.name().equals(name))
-                .findFirst()
-                .orElse(UND);
     }
 }

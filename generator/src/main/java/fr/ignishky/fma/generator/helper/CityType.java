@@ -19,7 +19,7 @@ public enum CityType {
     HAMLET(32, false, "hamlet"),
     NEIGHBORHOOD(64, false, "neighbourhood");
 
-    private final int key;
+    private final Integer key;
     private final boolean important;
     private final String value;
 
@@ -29,8 +29,8 @@ public enum CityType {
         this.value = value;
     }
 
-    public static String getOsmValue(int value, int displayClass) {
-        return stream(CityType.values())
+    public static String getOsmValue(Integer value, Integer displayClass) {
+        return stream(values())
                 .filter(cityType -> isTheBiggestCityType(value, displayClass < 8, cityType))
                 .map(CityType::getValue)
                 .findFirst().orElse("town");

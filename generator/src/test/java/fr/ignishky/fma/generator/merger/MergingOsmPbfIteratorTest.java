@@ -18,9 +18,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Iterators.forArray;
-import static com.google.common.collect.Lists.newArrayList;
 import static fr.ignishky.fma.generator.utils.CollectionUtils.streamIterator;
+import static java.util.Collections.emptyIterator;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.util.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,10 +29,8 @@ class MergingOsmPbfIteratorTest {
 
     @Test
     void should_merge_with_empty_iterator() {
-        List<EntityContainer> newArrayList = newArrayList();
-
-        assertThat(new MergingOsmPbfIterator(newArrayList.iterator(), newArrayList(node(1)).iterator()).hasNext()).isTrue();
-        assertThat(new MergingOsmPbfIterator(newArrayList.iterator(), newArrayList.iterator()).hasNext()).isFalse();
+        assertThat(new MergingOsmPbfIterator(emptyIterator(), List.of(node(1)).iterator()).hasNext()).isTrue();
+        assertThat(new MergingOsmPbfIterator(emptyIterator(), emptyIterator()).hasNext()).isFalse();
     }
 
     @Test
@@ -131,7 +130,7 @@ class MergingOsmPbfIteratorTest {
         Iterator<EntityContainer> it3 = forArray(node2, node15);
         Iterator<EntityContainer> it4 = forArray(way6, relation10);
 
-        Iterator<EntityContainer> merge = MergingOsmPbfIterator.init(newArrayList(it1, it2, it3, it4));
+        Iterator<EntityContainer> merge = MergingOsmPbfIterator.init(List.of(it1, it2, it3, it4));
 
         assertThat(streamIterator(merge)).containsExactly(node1, node2, node3, node15, way6, way13, relation5, relation10, relation21, relation22);
     }
@@ -142,7 +141,7 @@ class MergingOsmPbfIteratorTest {
         EntityContainer node1 = node(1);
         EntityContainer node3 = node(3);
         EntityContainer node4 = node(4);
-        Iterator<EntityContainer> merge = MergingOsmPbfIterator.init(newArrayList(forArray(node1, node3), forArray(node3, node4)));
+        Iterator<EntityContainer> merge = MergingOsmPbfIterator.init(List.of(forArray(node1, node3), forArray(node3, node4)));
 
         assertThat(streamIterator(merge)).containsExactly(node1, node3, node4);
     }

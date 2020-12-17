@@ -37,24 +37,16 @@ public class SplitAreas {
         }
     }
 
-    public List<String> file(BoundingBox boundingBox) {
-        return file(boundingBox.envelope());
+    @SuppressWarnings("unchecked")
+    public List<String> getFiles(BoundingBox boundingBox) {
+        return tree.query(boundingBox.envelope());
     }
 
     @SuppressWarnings("unchecked")
-    private List<String> file(Envelope envelope) {
-        return tree.query(envelope);
-    }
-
-    @SuppressWarnings("unchecked")
-    private String file(double x, double y) {
-        List<String> query = tree.query(point(x, y));
-        return query.isEmpty() ? null : query.get(0);
-    }
-
-    public String file(long geohash) {
+    public String getFile(long geohash) {
         LatLong decodeGeohash = decodeGeohash(geohash);
-        return file(decodeGeohash.getLon(), decodeGeohash.getLat());
+        List<String> query = tree.query(point(decodeGeohash.getLon(), decodeGeohash.getLat()));
+        return query.isEmpty() ? null : query.get(0);
     }
 
     private static Envelope point(double x, double y) {

@@ -21,7 +21,7 @@ class CapitalProviderTest {
     void should_load_capital_from_zones() {
         capitalProvider.init("and");
 
-        assertThat(capitalProvider.get(0)).hasSize(1);
-        assertThat(capitalProvider.get(0).map(Centroid::getName)).containsOnly("Andorra la Vella");
+        assertThat(capitalProvider.forLevel(0)).hasSize(1);
+        assertThat(capitalProvider.forLevel(0).map(Centroid::getName)).containsOnly("Andorra la Vella");
     }
 }

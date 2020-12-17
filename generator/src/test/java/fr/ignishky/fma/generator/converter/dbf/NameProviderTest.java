@@ -2,7 +2,7 @@ package fr.ignishky.fma.generator.converter.dbf;
 
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,14 +13,17 @@ class NameProviderTest {
 
     @Test
     void should_add_alternative_names() {
-        nameProvider.loadAlternateNames(Paths.get("src/test/resources/input/and/and/andand___________an.dbf"));
+        nameProvider.loadAlternateNames(Path.of("src/test/resources/input/and/and/andand___________an.dbf"));
+
         Map<String, String> tags = nameProvider.getAlternateNames(10200000000008L);
-        assertThat(tags).hasSize(6);
-        assertThat(tags.get("name:ca")).isEqualTo("Andorra_cat");
-        assertThat(tags.get("name:fr")).isEqualTo("Andorre");
-        assertThat(tags.get("alt_name:fr")).isEqualTo("Principauté d'andorre");
-        assertThat(tags.get("name:de")).isEqualTo("Andorra_ger");
-        assertThat(tags.get("name:en")).isEqualTo("Andorra_eng");
-        assertThat(tags.get("name:es")).isEqualTo("Andorra_spa");
+
+        assertThat(tags).containsAllEntriesOf(Map.of(
+                "name:ca", "Andorra_cat",
+                "name:fr", "Andorre",
+                "alt_name:fr", "Principauté d'andorre",
+                "name:de", "Andorra_ger",
+                "name:en", "Andorra_eng",
+                "name:es", "Andorra_spa"
+        ));
     }
 }

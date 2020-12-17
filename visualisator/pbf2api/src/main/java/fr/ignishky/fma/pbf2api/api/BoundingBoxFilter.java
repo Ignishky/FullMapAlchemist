@@ -1,6 +1,5 @@
 package fr.ignishky.fma.pbf2api.api;
 
-import com.google.common.collect.Lists;
 import fr.ignishky.fma.pbf2api.split.SplitFile;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
@@ -12,6 +11,7 @@ import org.openstreetmap.osmosis.core.domain.v0_6.RelationMember;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +35,7 @@ public class BoundingBoxFilter {
     }
 
     private List<EntityContainer> addRelations(SplitFile entities) {
-        List<EntityContainer> containers = Lists.newArrayList();
+        List<EntityContainer> containers = new ArrayList<>();
         for (Iterator<Relation> iterator = entities.getRelations(); iterator.hasNext();) {
             Relation next = iterator.next();
             List<Long> wayMembers = next.getMembers().stream().filter(rm -> rm.getMemberType() == Way).map(RelationMember::getMemberId).collect(toList());
@@ -49,7 +49,7 @@ public class BoundingBoxFilter {
     }
 
     private List<EntityContainer> addNodes(SplitFile entities, BoundingBox bbox) {
-        List<EntityContainer> containers = Lists.newArrayList();
+        List<EntityContainer> containers = new ArrayList<>();
         for (Iterator<Node> iterator = entities.nodesWithin(bbox); iterator.hasNext();) {
             Node node = iterator.next();
             requiredNodes.add(node.getId());
@@ -64,7 +64,7 @@ public class BoundingBoxFilter {
     }
 
     private List<EntityContainer> addWays(SplitFile entities) {
-        List<EntityContainer> containers = Lists.newArrayList();
+        List<EntityContainer> containers = new ArrayList<>();
         for (Iterator<Way> iterator = entities.getWays(); iterator.hasNext();) {
             Way way = iterator.next();
             List<Long> wayNodes = way.getWayNodes().stream().map(WayNode::getNodeId).collect(toList());

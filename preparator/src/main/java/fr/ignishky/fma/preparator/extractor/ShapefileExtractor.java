@@ -11,7 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
 
@@ -47,12 +47,12 @@ public class ShapefileExtractor {
 
             SevenZArchiveEntry entry;
             while ((entry = archive.getNextEntry()) != null) {
-                String filename = Paths.get(entry.getName()).getFileName().toString();
+                String filename = Path.of(entry.getName()).getFileName().toString();
 
                 if (allFilesFrom(product).anyMatch(filename::contains)) {
-                    File zoneDirectory = Paths.get(outputFolder.getAbsolutePath(), countryCode, zone).toFile();
+                    File zoneDirectory = Path.of(outputFolder.getAbsolutePath(), countryCode, zone).toFile();
                     zoneDirectory.mkdirs();
-                    File outputFile = Paths.get(zoneDirectory.getAbsolutePath(), filename.replace(".gz", "")).toFile();
+                    File outputFile = Path.of(zoneDirectory.getAbsolutePath(), filename.replace(".gz", "")).toFile();
                     if (outputFile.exists()) {
                         log.info("File {} already present", outputFile.getName());
                     } else {

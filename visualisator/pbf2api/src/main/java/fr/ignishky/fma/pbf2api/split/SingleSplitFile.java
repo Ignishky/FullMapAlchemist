@@ -18,7 +18,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,7 +45,7 @@ public class SingleSplitFile implements SplitFile {
     public SingleSplitFile(String filename) {
         try {
             log.info("Loading OSM {}", filename);
-            for (Path path : Files.list(Paths.get(filename)).collect(toList())) {
+            for (Path path : Files.list(Path.of(filename)).collect(toList())) {
                 OsmosisReader reader = new OsmosisReader(new FileInputStream(path.toString()));
                 reader.setSink(new SplitterSink(path.toString()) {
                     @Override

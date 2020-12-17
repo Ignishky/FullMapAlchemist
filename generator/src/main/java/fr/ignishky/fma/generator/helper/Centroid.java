@@ -3,6 +3,7 @@ package fr.ignishky.fma.generator.helper;
 import com.vividsolutions.jts.geom.Point;
 import fr.ignishky.fma.generator.reader.Feature;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 import lombok.With;
 
@@ -15,19 +16,16 @@ import static fr.ignishky.fma.generator.reader.Feature.Attribute.POSTCODE;
 @Value
 @With
 @AllArgsConstructor
+@NoArgsConstructor(force = true)
 public class Centroid {
 
-    private final Long id;
-    private final String name;
-    private final String postcode;
-    private final int adminClass;
-    private final int cityTyp;
-    private final int displayClass;
-    private final Point point;
-
-    public Centroid() {
-        this(null, null, null, -1, -1, -1, null);
-    }
+    Long id;
+    String name;
+    String postcode;
+    Integer adminClass;
+    Integer cityTyp;
+    Integer displayClass;
+    Point point;
 
     static Centroid from(Feature feature) {
         return new Centroid()

@@ -38,16 +38,20 @@ cd iD
 
 ### Redirect
 
-iD get details from a server, by default an OSM one, we need to use a custom one that is couple with our own data.
+By default, iD get details from an official OSM server. To read our converted data, we need to redirect to our own server.
 
 That's the goal of Pbf2APi.
 
 All we need to change is the value of the properties `urlroot` in the file `modules/services/osm.js` to our Pbf2Api server to `http://localhost:9090`.
 
-### Run 
+### Run
+
+Just do what you will do with a classic iD as explained [here]{https://github.com/openstreetmap/iD}
+
 ```bash
 npm install
 npm run all
 npm start
 ```
+
 http://localhost:8080

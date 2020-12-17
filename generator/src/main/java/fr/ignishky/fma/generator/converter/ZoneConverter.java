@@ -74,7 +74,7 @@ class ZoneConverter {
             convertFiles.add(a0.convert(countryCode, zoneCode, capitalProvider));
         } else {
             convertFiles.add(railRoad.convert(countryCode, zoneCode));
-            //  convertFiles.add(waterArea.convert(countryCode, zoneCode));
+            convertFiles.add(waterArea.convert(countryCode, zoneCode));
         }
 
         osmMerger.merge(convertFiles, outputFile);

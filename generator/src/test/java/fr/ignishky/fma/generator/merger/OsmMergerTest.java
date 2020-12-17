@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OsmMergerTest {
@@ -26,7 +26,7 @@ class OsmMergerTest {
     @Test
     void should_copy_the_only_input_file() throws IOException {
 
-        osmMerger.merge(newArrayList(PRODUCT_PDF), Paths.get(OUTPUT_PBF));
+        osmMerger.merge(List.of(PRODUCT_PDF), Path.of(OUTPUT_PBF));
 
         assertThat(Files.equal(new File(OUTPUT_PBF), new File(PRODUCT_PDF))).isTrue();
     }
@@ -34,7 +34,7 @@ class OsmMergerTest {
     @Test
     void should_merge_all_input_files() throws IOException {
 
-        osmMerger.merge(newArrayList("src/test/resources/output/bel.osm.pbf", "src/test/resources/output/lux.osm.pbf", "src/test/resources/output/nld.osm.pbf"), Paths.get(OUTPUT_PBF));
+        osmMerger.merge(List.of("src/test/resources/output/bel.osm.pbf", "src/test/resources/output/lux.osm.pbf", "src/test/resources/output/nld.osm.pbf"), Path.of(OUTPUT_PBF));
 
         assertThat(Files.equal(new File(OUTPUT_PBF), new File("src/test/resources/output/merged.osm.pbf"))).isTrue();
     }

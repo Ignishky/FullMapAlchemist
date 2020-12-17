@@ -12,13 +12,13 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.util.Modules.override;
 import static fr.ignishky.fma.preparator.downloader.FamiliesDownloader.FAMILIES_URL;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.list;
-import static java.nio.file.Paths.get;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,9 +36,9 @@ class MainIT {
 
         main.run();
 
-        assertThat(list(get(OUTPUT_FOLDER))).containsOnly(get(OUTPUT_FOLDER, "lux"), get(OUTPUT_FOLDER, "eur2016_09-shpd-mn-lux-lux.7z.001"));
-        assertThat(list(get(OUTPUT_FOLDER , "lux"))).containsOnly(get(OUTPUT_FOLDER, "lux", "lux"));
-        assertThat(list(get(OUTPUT_FOLDER , "lux", "lux"))).containsOnly(get(OUTPUT_FOLDER, "lux", "lux", "lux______________a0.shp"));
+        assertThat(list(Path.of(OUTPUT_FOLDER))).containsOnly(Path.of(OUTPUT_FOLDER, "lux"), Path.of(OUTPUT_FOLDER, "eur2016_09-shpd-mn-lux-lux.7z.001"));
+        assertThat(list(Path.of(OUTPUT_FOLDER , "lux"))).containsOnly(Path.of(OUTPUT_FOLDER, "lux", "lux"));
+        assertThat(list(Path.of(OUTPUT_FOLDER , "lux", "lux"))).containsOnly(Path.of(OUTPUT_FOLDER, "lux", "lux", "lux______________a0.shp"));
     }
 
     private static class DownloadModuleIT extends AbstractModule {
