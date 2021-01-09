@@ -6,7 +6,10 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 public class MultiSplitFile implements SplitFile {
 
@@ -19,18 +22,24 @@ public class MultiSplitFile implements SplitFile {
     }
 
     @Override
+    public Collection<Node> getNodes(BoundingBox boundingBox) {
+        Set<Node> result = new HashSet<>();
+        result.addAll(file1.getNodes(boundingBox));
+        result.addAll(file2.getNodes(boundingBox));
+        return result;
+    }
+
+    @Override
+    public Collection<Way> getWays() {
+        Set<Way> result = new HashSet<>();
+        result.addAll(file1.getWays());
+        result.addAll(file2.getWays());
+        return result;
+    }
+
+    @Override
     public Iterator<Relation> getRelations() {
         return Iterators.concat(file1.getRelations(), file2.getRelations());
-    }
-
-    @Override
-    public Iterator<Node> nodesWithin(BoundingBox bbox) {
-        return Iterators.concat(file1.nodesWithin(bbox), file2.nodesWithin(bbox));
-    }
-
-    @Override
-    public Iterator<Way> getWays() {
-        return Iterators.concat(file1.getWays(), file2.getWays());
     }
 
     @Override

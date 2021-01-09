@@ -1,7 +1,6 @@
 package fr.ignishky.fma.pbf2api.split;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import crosby.binary.osmosis.OsmosisReader;
@@ -19,11 +18,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -31,21 +33,15 @@ public class SingleSplitFile implements SplitFile {
 
     private static final GeometryFactory gf = new GeometryFactory();
 
-    private final Map<Long, Node> nodes = new HashMap<>(100);
-    private final List<Way> ways = new ArrayList<>(100);
-    private final List<Relation> relations = new ArrayList<>(100);
+    private final Map<Long, Node> nodes = new HashMap<>();
+    private final List<Way> ways = new ArrayList<>();
+    private final List<Relation> relations = new ArrayList<>();
     private final STRtree tree = new STRtree();
 
-    @SuppressWarnings("unchecked")
-    public Iterator<Node> nodesWithin(BoundingBox boundingBox) {
-        List<Long> ids = tree.query(boundingBox.envelope());
-        return ids.stream().map(nodes::get).iterator();
-    }
-
     public SingleSplitFile(String filename) {
-        try {
+        try (Stream<Path> paths = Files.list(Path.of(filename))) {
             log.info("Loading OSM {}", filename);
-            for (Path path : Files.list(Path.of(filename)).collect(toList())) {
+            for (Path path : paths.collect(toList())) {
                 OsmosisReader reader = new OsmosisReader(new FileInputStream(path.toString()));
                 reader.setSink(new SplitterSink(path.toString()) {
                     @Override
@@ -59,23 +55,30 @@ public class SingleSplitFile implements SplitFile {
                     }
 
                     @Override
-                    public void process(NodeContainer node) {
-                        tree.insert(point(node.getEntity()), node.getEntity().getId());
-                        nodes.put(node.getEntity().getId(), node.getEntity());
+                    public void process(NodeContainer nodeContainer) {
+                        Node node = nodeContainer.getEntity();
+                        tree.insert(gf.createPoint(new Coordinate(node.getLongitude(), node.getLatitude())).getEnvelopeInternal(), node.getId());
+                        nodes.put(node.getId(), node);
                     }
                 });
                 reader.run();
             }
-
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
 
-        log.info("Nodes: {} - Ways : {}", nodes.size(), ways.size());
+        log.info("Nodes : {} - Ways : {} - Relations : {}", nodes.size(), ways.size(), relations.size());
     }
 
-    private static Envelope point(Node node) {
-        return gf.createPoint(new Coordinate(node.getLongitude(), node.getLatitude())).getEnvelopeInternal();
+    @SuppressWarnings("unchecked")
+    public Collection<Node> getNodes(BoundingBox boundingBox) {
+        List<Long> ids = tree.query(boundingBox.envelope());
+        return ids.stream().map(nodes::get).collect(toList());
+    }
+
+    @Override
+    public Collection<Way> getWays() {
+        return unmodifiableList(ways);
     }
 
     @Override
@@ -86,10 +89,5 @@ public class SingleSplitFile implements SplitFile {
     @Override
     public Iterator<Relation> getRelations() {
         return relations.iterator();
-    }
-
-    @Override
-    public Iterator<Way> getWays() {
-        return ways.iterator();
     }
 }

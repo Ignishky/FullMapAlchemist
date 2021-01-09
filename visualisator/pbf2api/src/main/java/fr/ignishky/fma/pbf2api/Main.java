@@ -3,6 +3,7 @@ package fr.ignishky.fma.pbf2api;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.gson.Gson;
 import fr.ignishky.fma.pbf2api.api.BoundingBox;
 import fr.ignishky.fma.pbf2api.api.BoundingBoxFilter;
 import fr.ignishky.fma.pbf2api.split.MultiSplitFile;
@@ -10,36 +11,18 @@ import fr.ignishky.fma.pbf2api.split.SingleSplitFile;
 import fr.ignishky.fma.pbf2api.split.SplitAreas;
 import fr.ignishky.fma.pbf2api.split.SplitFile;
 import lombok.extern.slf4j.Slf4j;
-import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
-import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
-import org.openstreetmap.osmosis.core.container.v0_6.RelationContainer;
-import org.openstreetmap.osmosis.core.container.v0_6.WayContainer;
-import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
-import org.openstreetmap.osmosis.core.domain.v0_6.RelationMember;
-import org.openstreetmap.osmosis.core.domain.v0_6.Way;
-import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
-import org.openstreetmap.osmosis.xml.v0_6.impl.OsmWriter;
 import spark.Request;
 import spark.Response;
 import spark.utils.IOUtils;
 
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static fr.ignishky.fma.pbf2api.model.OSM.toOSM;
 import static java.lang.Double.parseDouble;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.eclipse.jetty.http.HttpStatus.Code.NOT_FOUND;
-import static org.openstreetmap.osmosis.core.domain.v0_6.EntityType.Way;
 import static spark.Spark.before;
 import static spark.Spark.exception;
 import static spark.Spark.get;
@@ -49,6 +32,9 @@ import static spark.Spark.port;
 public final class Main {
 
     private static final String APPLICATION_XML = "application/xml";
+    private static final String APPLICATION_JSON = "application/json";
+    private static final SplitAreas SPLIT_AREAS = new SplitAreas();
+    private static final Gson GSON = new Gson();
 
     private Main() {
     }
@@ -56,7 +42,6 @@ public final class Main {
     public static void main(String[] args) {
         checkArgument(args.length == 1, "Usage : Main <splitterFolder>");
 
-        SplitAreas splitter = new SplitAreas();
         LoadingCache<String, SingleSplitFile> cache = CacheBuilder.newBuilder().maximumSize(4).build(new CacheLoader<String, SingleSplitFile>() {
             @Override
             public SingleSplitFile load(String key) {
@@ -78,113 +63,11 @@ public final class Main {
             return IOUtils.toString(Main.class.getResourceAsStream("/api/capabilities"));
         });
 
-        get("/api/0.6/map", (Request req, Response res) -> {
-            log.debug("Calling /api/0.6/map?bbox={}", req.queryParams("bbox"));
-            res.type(APPLICATION_XML);
-            BoundingBox boundingBox = createBBox(req.queryParams("bbox"));
-            return xml(new BoundingBoxFilter().filter(splittedFile(cache, splitter.getFiles(boundingBox)), boundingBox));
-        });
-
-        get("/api/0.6/node/:id", (req, res) -> {
-            log.debug("Calling /api/0.6/node/{}", req.params("id"));
-            res.type(APPLICATION_XML);
-            Long id = Long.valueOf(req.params("id"));
-            return xml(new NodeContainer(cache.get(splitter.getFile(id)).getNodeById(id)));
-        });
-
-        get("/api/0.6/node/:id/ways", (req, res) -> {
-            log.debug("Calling /api/0.6/node/{}/ways", req.params("id"));
-            res.type(APPLICATION_XML);
-            Long id = Long.valueOf(req.params("id"));
-            return xml(streamIterator(cache.get(splitter.getFile(id)).getWays())
-                    .filter(way -> way.getWayNodes().stream().map(WayNode::getNodeId).collect(toSet()).contains(id))
-                    .map(WayContainer::new)
-                    .collect(toList()));
-        });
-
-        get("/api/0.6/way/:id", (req, res) -> {
-            log.debug("Calling /api/0.6/way/{}", req.params("id"));
-            res.type(APPLICATION_XML);
-            Long id = Long.valueOf(req.params("id"));
-            Optional<Way> way = streamIterator(cache.get(splitter.getFile(id)).getWays()).filter(w -> w.getId() == id).findFirst();
-            if (way.isPresent()) {
-                return xml(new WayContainer(way.get()));
-
-            } else {
-                res.status(NOT_FOUND.getCode());
-                return "Not found";
-            }
-        });
-
-        get("/api/0.6/way/:id/relations", (req, res) -> {
-            log.debug("Calling /api/0.6/way/{}/relations", req.params("id"));
-            res.type(APPLICATION_XML);
-            Long id = Long.valueOf(req.params("id"));
-            return xml(streamIterator(cache.get(splitter.getFile(id)).getRelations())
-                    .filter(rel -> rel.getMembers().stream()
-                            .filter(member -> member.getMemberType() == Way)
-                            .map(RelationMember::getMemberId)
-                            .collect(toSet())
-                            .contains(id))
-                    .map(RelationContainer::new)
-                    .collect(toList()));
-        });
-
-        get("/api/0.6/relation/:id", (req, res) -> {
-            log.debug("Calling /api/0.6/relation/{}", req.params("id"));
-            res.type(APPLICATION_XML);
-            Long id = Long.valueOf(req.params("id"));
-            Optional<Relation> relation = streamIterator(cache.get(splitter.getFile(id)).getRelations()).filter(rel -> rel.getId() == id).findFirst();
-            if (relation.isPresent()) {
-                return xml(new RelationContainer(relation.get()));
-
-            } else {
-                res.status(NOT_FOUND.getCode());
-                return "Not found";
-            }
-        });
-
-        get("/api/0.6/relation/:id/full", (req, res) -> {
-            log.debug("Calling /api/0.6/relation/{}/full", req.params("id"));
-            res.type(APPLICATION_XML);
-            Long id = Long.valueOf(req.params("id"));
-            SingleSplitFile file = cache.get(splitter.getFile(id));
-            Optional<Relation> relation = streamIterator(file.getRelations()).filter(rel -> rel.getId() == id).findFirst();
-            if (relation.isPresent()) {
-                EntityContainer rel = new RelationContainer(relation.get());
-                List<EntityContainer> entities = relation.get().getMembers().stream()
-                        .filter(rm -> rm.getMemberType() == Way)
-                        .map(RelationMember::getMemberId)
-                        .map(geohash -> {
-                            try {
-                                return streamIterator(cache.get(splitter.getFile(geohash)).getWays()).filter(w -> w.getId() == geohash).findFirst();
-
-                            } catch (ExecutionException e) {
-                                throw new IllegalStateException(e);
-                            }
-                        })
-                        .filter(Optional::isPresent)
-                        .flatMap(o -> {
-                            try {
-                                List<EntityContainer> containers = new ArrayList<>();
-                                for (WayNode wn : o.get().getWayNodes()) {
-                                    containers.add(new NodeContainer(cache.get(splitter.getFile(wn.getNodeId())).getNodeById(wn.getNodeId())));
-                                }
-                                containers.add(new WayContainer(o.get()));
-                                return containers.stream();
-
-                            } catch (ExecutionException e) {
-                                throw new IllegalStateException(e);
-                            }
-                        })
-                        .collect(toList());
-                entities.add(rel);
-                return xml(entities);
-
-            } else {
-                res.status(NOT_FOUND.getCode());
-                return "Not found";
-            }
+        get("/api/0.6/map.json", (Request req, Response res) -> {
+            log.debug("Calling /api/0.6/map.json?bbox={}", req.queryParams("bbox"));
+            res.type(APPLICATION_JSON);
+            BoundingBox bBox = createBBox(req.queryParams("bbox"));
+            return GSON.toJson(toOSM(new BoundingBoxFilter().filter(splitFile(cache, SPLIT_AREAS.getAreas(bBox)), bBox)));
         });
 
         exception(Exception.class, (exception, request, response) -> log.error("An error occurred", exception));
@@ -201,36 +84,10 @@ public final class Main {
         return new BoundingBox(min(lat1, lat2), min(lng1, lng2), max(lat1, lat2), max(lng1, lng2));
     }
 
-    private static SplitFile splittedFile(LoadingCache<String, SingleSplitFile> cache, List<String> fileNames) throws ExecutionException {
-        if (fileNames.size() == 1) {
-            return cache.get(fileNames.get(0));
+    private static SplitFile splitFile(LoadingCache<String, SingleSplitFile> cache, List<String> areas) throws ExecutionException {
+        if (areas.size() == 1) {
+            return cache.get(areas.get(0));
         }
-        return new MultiSplitFile(cache.get(fileNames.get(0)), splittedFile(cache, fileNames.subList(1, fileNames.size())));
-    }
-
-    private static <T> Stream<T> streamIterator(Iterator<T> it) {
-        return StreamSupport.stream(((Iterable<T>) () -> it).spliterator(), false);
-    }
-
-    private static String xml(List<EntityContainer> containers) {
-        OsmWriter osmWriter = new OsmWriter("osm", 0, true, false);
-        StringWriter stringWriter = new StringWriter();
-        osmWriter.setWriter(stringWriter);
-        osmWriter.begin();
-        for (EntityContainer container : containers) {
-            osmWriter.process(container);
-        }
-        osmWriter.end();
-        return stringWriter.toString();
-    }
-
-    private static String xml(EntityContainer container) {
-        OsmWriter osmWriter = new OsmWriter("osm", 0, true, false);
-        StringWriter stringWriter = new StringWriter();
-        osmWriter.setWriter(stringWriter);
-        osmWriter.begin();
-        osmWriter.process(container);
-        osmWriter.end();
-        return stringWriter.toString();
+        return new MultiSplitFile(cache.get(areas.get(0)), splitFile(cache, areas.subList(1, areas.size())));
     }
 }

@@ -5,15 +5,16 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 public interface SplitFile {
 
+    Collection<Node> getNodes(BoundingBox boundingBox);
+
+    Collection<Way> getWays();
+
     Iterator<Relation> getRelations();
-
-    Iterator<Node> nodesWithin(BoundingBox boundingBox);
-
-    Iterator<Way> getWays();
 
     Node getNodeById(Long id);
 }
