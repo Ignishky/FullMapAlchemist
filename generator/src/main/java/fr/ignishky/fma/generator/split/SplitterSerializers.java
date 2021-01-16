@@ -1,7 +1,14 @@
 package fr.ignishky.fma.generator.split;
 
+import com.github.davidmoten.geo.LatLong;
 import com.vividsolutions.jts.geom.Envelope;
 import crosby.binary.osmosis.OsmosisSerializer;
+import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
+import org.openstreetmap.osmosis.core.domain.v0_6.Entity;
+import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
+import org.openstreetmap.osmosis.core.domain.v0_6.RelationMember;
+import org.openstreetmap.osmosis.core.domain.v0_6.Way;
+import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import org.openstreetmap.osmosis.osmbinary.file.BlockOutputStream;
 
@@ -15,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static fr.ignishky.fma.generator.helper.Geohash.decodeGeohash;
 import static fr.ignishky.fma.generator.utils.Constants.OUTPUT_FOLDER;
 import static java.util.stream.Collectors.toList;
 
@@ -29,16 +37,38 @@ class SplitterSerializers {
         splitterFolder = Path.of(outputFolder.getPath(), "splitter").toString();
     }
 
-    List<String> getAreas(Envelope envelope) {
-        return areas.files(envelope).stream().map(this::getSerializer).collect(toList());
+    List<String> getAreas(EntityContainer entityContainer) {
+        return areas.files(envelope(entityContainer)).stream().map(this::getSerializer).collect(toList());
     }
 
     Sink getSink(String area) {
         return sinkByArea.get(area);
     }
 
-    Sink getSink(double x, double y) {
-        return sinkByArea.get(areas.file(x, y));
+    private static Envelope envelope(EntityContainer entityContainer) {
+        Envelope env = new Envelope();
+        Entity entity = entityContainer.getEntity();
+        switch (entity.getType()) {
+            case Node:
+                LatLong geohash = decodeGeohash(entity.getId());
+                env.expandToInclude(geohash.getLon(), geohash.getLat());
+                break;
+            case Way:
+                for (WayNode wn : ((Way) entity).getWayNodes()) {
+                    geohash = decodeGeohash(wn.getNodeId());
+                    env.expandToInclude(geohash.getLon(), geohash.getLat());
+                }
+                break;
+            case Relation:
+                for (RelationMember wn : ((Relation) entity).getMembers()) {
+                    geohash = decodeGeohash(wn.getMemberId());
+                    env.expandToInclude(geohash.getLon(), geohash.getLat());
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Could not generate envelop for " + entity.getType());
+        }
+        return env;
     }
 
     private String getSerializer(String filename) {

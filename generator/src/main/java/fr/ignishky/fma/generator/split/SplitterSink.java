@@ -39,7 +39,7 @@ public abstract class SplitterSink implements Sink {
             process((RelationContainer) entityContainer);
         }
 
-        if (counter.getAndIncrement() % 1_000_000 == 0) {
+        if (counter.getAndIncrement() % 500_000 == 0) {
             log.info("{} : {}", name, counter);
         }
     }
