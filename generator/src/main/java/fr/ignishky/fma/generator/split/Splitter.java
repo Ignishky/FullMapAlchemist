@@ -8,88 +8,96 @@ import com.vividsolutions.jts.geom.Envelope;
 import org.openstreetmap.osmosis.core.container.v0_6.NodeContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.RelationContainer;
 import org.openstreetmap.osmosis.core.container.v0_6.WayContainer;
+import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
+import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.RelationMember;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import org.openstreetmap.osmosis.pbf2.v0_6.PbfReader;
 
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import static fr.ignishky.fma.generator.helper.Geohash.decodeGeohash;
 
 public class Splitter {
 
-    private final SplitterSerializers kml;
+    private final SplitterSerializers serializers;
 
     @Inject
-    public Splitter(SplitterSerializers kml) {
-        this.kml = kml;
+    public Splitter(SplitterSerializers serializers) {
+        this.serializers = serializers;
     }
 
     public void split(Path file) {
-        Multimap<Long, Long> wayByRelations = ArrayListMultimap.create();
-        Multimap<Long, Integer> borderNodeTargets = ArrayListMultimap.create();
-        firstPass(file, wayByRelations, borderNodeTargets);
-        finalPass(wayByRelations, borderNodeTargets, file);
+        Multimap<Long, String> areasByNode = ArrayListMultimap.create();
+        Multimap<Long, String> areasByWay = ArrayListMultimap.create();
+
+        preparePass(file, areasByWay, areasByNode);
+        processPass(file, areasByWay, areasByNode);
     }
 
-    private void firstPass(Path file, Multimap<Long, Long> wayByRelations, Multimap<Long, Integer> borderNodeTargets) {
-        read(file, new SplitterSink("first pass") {
+    private void preparePass(Path fileToSplit, Multimap<Long, String> areasByWay, Multimap<Long, String> areasByNode) {
+        read(fileToSplit, new SplitterSink("prepare pass") {
 
             @Override
             public void process(NodeContainer node) {
-                // Don't process node on first pass
+                // Don't process node in the prepare pass
             }
 
             @Override
             public void process(WayContainer way) {
-                List<Integer> targets = kml.serializer(envelope(way));
-                if (targets.size() > 1) {
-                    for (WayNode wn : way.getEntity().getWayNodes()) {
-                        targets.forEach(target -> borderNodeTargets.put(wn.getNodeId(), target));
+                List<String> areas = serializers.getAreas(envelope(way));
+                if(areas.size() > 1) {
+                    for (WayNode node : way.getEntity().getWayNodes()) {
+                        areas.forEach(area -> areasByNode.put(node.getNodeId(), area));
                     }
                 }
             }
 
             @Override
             public void process(RelationContainer relation) {
-                relation.getEntity().getMembers().forEach(rm -> wayByRelations.put(rm.getMemberId(), relation.getEntity().getId()));
+                List<String> areas = serializers.getAreas(envelope(relation));
+                if(areas.size() > 1) {
+                    for (RelationMember member : relation.getEntity().getMembers()) {
+                        if (member.getMemberType() == EntityType.Node) {
+                            areas.forEach(area -> areasByNode.put(member.getMemberId(), area));
+                        } else if (member.getMemberType() == EntityType.Way) {
+                            areas.forEach(area -> areasByWay.put(member.getMemberId(), area));
+                        }
+                    }
+                }
             }
         });
     }
 
-    private void finalPass(Multimap<Long, Long> wayByRelations, Multimap<Long, Integer> borderNodeTargets, Path file) {
-        Multimap<Long, Integer> relationTargets = ArrayListMultimap.create();
-        read(file, new SplitterSink("final pass") {
+    private void processPass(Path file, Multimap<Long, String> areasByWay, Multimap<Long, String> areasByNode) {
+        read(file, new SplitterSink("process pass") {
 
             @Override
             public void process(NodeContainer node) {
-                long nodeId = node.getEntity().getId();
-                if (borderNodeTargets.containsKey(nodeId)) {
-                    borderNodeTargets.get(nodeId).forEach(target -> kml.serializer(target).process(node));
+                Node entity = node.getEntity();
+                if (areasByNode.containsKey(entity.getId())) {
+                    areasByNode.get(entity.getId()).forEach(area -> serializers.getSink(area).process(node));
                 } else {
-                    kml.serializer(node.getEntity().getLongitude(), node.getEntity().getLatitude()).process(node);
+                    serializers.getSink(entity.getLongitude(), entity.getLatitude()).process(node);
                 }
             }
 
             @Override
             public void process(WayContainer way) {
-                List<Integer> targets = kml.serializer(envelope(way));
+                List<String> areas = serializers.getAreas(envelope(way));
                 long wayId = way.getEntity().getId();
-                if (wayByRelations.containsKey(wayId)) {
-                    wayByRelations.get(wayId).forEach(rel -> relationTargets.putAll(rel, targets));
+                if (areasByWay.containsKey(wayId)) {
+                    areasByWay.get(wayId).forEach(area -> serializers.getSink(area).process(way));
+                } else {
+                    areas.forEach(area -> serializers.getSink(area).process(way));
                 }
-                targets.forEach(target -> kml.serializer(target).process(way));
             }
 
             @Override
             public void process(RelationContainer relation) {
-                Collection<Integer> targets = new HashSet<>(kml.serializer(envelope(relation)));
-                targets.addAll(relationTargets.get(relation.getEntity().getId()));
-                targets.forEach(target -> kml.serializer(target).process(relation));
+                serializers.getAreas(envelope(relation)).forEach(area -> serializers.getSink(area).process(relation));
             }
         });
     }

@@ -45,7 +45,7 @@ public final class Main {
         LoadingCache<String, SingleSplitFile> cache = CacheBuilder.newBuilder().maximumSize(4).build(new CacheLoader<String, SingleSplitFile>() {
             @Override
             public SingleSplitFile load(String key) {
-                return new SingleSplitFile(args[0] + "/" + key);
+                return new SingleSplitFile(args[0] + "/" + key + ".osm.pbf");
             }
         });
 

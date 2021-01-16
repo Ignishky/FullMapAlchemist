@@ -14,8 +14,7 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
@@ -39,31 +37,30 @@ public class SingleSplitFile implements SplitFile {
     private final STRtree tree = new STRtree();
 
     public SingleSplitFile(String filename) {
-        try (Stream<Path> paths = Files.list(Path.of(filename))) {
+        try {
             log.info("Loading OSM {}", filename);
-            for (Path path : paths.collect(toList())) {
-                OsmosisReader reader = new OsmosisReader(new FileInputStream(path.toString()));
-                reader.setSink(new SplitterSink(path.toString()) {
-                    @Override
-                    public void process(RelationContainer rel) {
-                        relations.add(rel.getEntity());
-                    }
+            Path path = Path.of(filename);
+            OsmosisReader reader = new OsmosisReader(new FileInputStream(path.toString()));
+            reader.setSink(new SplitterSink(path.toString()) {
+                @Override
+                public void process(RelationContainer rel) {
+                    relations.add(rel.getEntity());
+                }
 
-                    @Override
-                    public void process(WayContainer way) {
-                        ways.add(way.getEntity());
-                    }
+                @Override
+                public void process(WayContainer way) {
+                    ways.add(way.getEntity());
+                }
 
-                    @Override
-                    public void process(NodeContainer nodeContainer) {
-                        Node node = nodeContainer.getEntity();
-                        tree.insert(gf.createPoint(new Coordinate(node.getLongitude(), node.getLatitude())).getEnvelopeInternal(), node.getId());
-                        nodes.put(node.getId(), node);
-                    }
-                });
-                reader.run();
-            }
-        } catch (IOException e) {
+                @Override
+                public void process(NodeContainer nodeContainer) {
+                    Node node = nodeContainer.getEntity();
+                    tree.insert(gf.createPoint(new Coordinate(node.getLongitude(), node.getLatitude())).getEnvelopeInternal(), node.getId());
+                    nodes.put(node.getId(), node);
+                }
+            });
+            reader.run();
+        } catch (FileNotFoundException e) {
             throw new IllegalStateException(e);
         }
 

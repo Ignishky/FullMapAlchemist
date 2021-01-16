@@ -35,7 +35,7 @@ public class SplitAreas {
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> file(Envelope envelope) {
+    public List<String> files(Envelope envelope) {
         return tree.query(envelope);
     }
 
