@@ -76,7 +76,7 @@ class ZoneConverterTest {
         verify(splitter).split(Paths.get(zonePbfFileName));
         verify(osmMerger).merge(List.of(productPbfFileName), Paths.get(zonePbfFileName));
 
-        assertThat(generate).isEqualTo(zonePbfFileName);
+        assertThat(new File(generate)).isEqualTo(new File(zonePbfFileName));
     }
 
     @Test
@@ -93,6 +93,6 @@ class ZoneConverterTest {
         verify(osmMerger).merge(argumentCaptor.capture(), eq(Paths.get(zonePbfFileName)));
         assertThat(argumentCaptor.getValue()).containsOnly(waPbfFileName, rrPbfFileName);
 
-        assertThat(generate).isEqualTo(zonePbfFileName);
+        assertThat(new File(generate)).isEqualTo(new File(zonePbfFileName));
     }
 }

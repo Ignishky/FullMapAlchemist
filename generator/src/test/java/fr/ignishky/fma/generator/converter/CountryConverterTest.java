@@ -63,6 +63,6 @@ class CountryConverterTest {
         verify(osmMerger).merge(argumentCaptor.capture(), eq(Paths.get(LUX_OSM_PBF)));
         assertThat(argumentCaptor.getValue()).containsOnly("lux-lux.osm.pbf", "lux-ax.osm.pbf");
 
-        assertThat(generate).isEqualTo(LUX_OSM_PBF);
+        assertThat(new File(generate)).isEqualTo(new File(LUX_OSM_PBF));
     }
 }

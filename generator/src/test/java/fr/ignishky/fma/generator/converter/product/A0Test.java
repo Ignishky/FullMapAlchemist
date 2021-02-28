@@ -7,6 +7,7 @@ import fr.ignishky.fma.generator.helper.CapitalProvider;
 import fr.ignishky.fma.generator.helper.Centroid;
 import fr.ignishky.fma.generator.utils.PbfContent;
 import org.geotools.geometry.jts.LiteCoordinateSequence;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
 import org.openstreetmap.osmosis.core.domain.v0_6.RelationMember;
@@ -42,6 +43,12 @@ class A0Test {
     private final CapitalProvider capitalProvider = mock(CapitalProvider.class);
 
     private final A0 a0 = new A0(new File(RESOURCES_INPUT), nameProvider, new File(TARGET_GENERATOR));
+
+    @BeforeEach
+    void cleanOldOutput() {
+        new File("target/generator/and/ax/products/a0.osm.pbf").delete();
+        new File("target/generator/lux/ax/products/a0.osm.pbf").delete();
+    }
 
     @Test
     void should_throw_IllegalStateException_when_a0_shapefile_missing_in_ax_folder() {

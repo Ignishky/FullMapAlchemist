@@ -2,6 +2,8 @@ package fr.ignishky.fma.generator.converter.product;
 
 import fr.ignishky.fma.generator.converter.dbf.NameProvider;
 import fr.ignishky.fma.generator.utils.PbfContent;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openstreetmap.osmosis.core.domain.v0_6.Relation;
 
@@ -20,6 +22,12 @@ class WaterAreaTest {
     private final NameProvider nameProvider = mock(NameProvider.class);
 
     private final WaterArea waterArea = new WaterArea(new File(RESOURCES_INPUT), nameProvider, new File(TARGET_GENERATOR));
+
+    @BeforeEach
+    void cleanOldOutput() {
+        new File("target/generator/and/and/products/wa.osm.pbf").delete();
+        new File("target/generator/lux/lux/products/wa.osm.pbf").delete();
+    }
 
     @Test
     void should_throw_IllegalStateException_when_water_area_shapefile_missing_in_ax_folder() {

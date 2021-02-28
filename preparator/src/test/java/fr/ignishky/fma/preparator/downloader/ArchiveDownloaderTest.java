@@ -48,7 +48,8 @@ class ArchiveDownloaderTest {
 
         File file = archiveDownloader.apply(new Content("content.7z.001", "loc"));
 
-        assertThat(file.getPath()).isEqualTo("target/content.7z.001");
+        assertThat(file).isEqualTo(new File("target/content.7z.001")
+        );
     }
 
     @Test

@@ -1,6 +1,8 @@
 package fr.ignishky.fma.generator.converter.product;
 
 import fr.ignishky.fma.generator.converter.dbf.NameProvider;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 
@@ -20,6 +22,12 @@ class RailRoadTest {
     private final NameProvider nameProvider = mock(NameProvider.class);
 
     private final RailRoad railRoad = new RailRoad(new File(RESOURCES_INPUT), nameProvider, new File(TARGET_GENERATOR));
+
+    @BeforeEach
+    void cleanOldOutput() {
+        new File("target/generator/and/and/products/rr.osm.pbf").delete();
+        new File("target/generator/lux/lux/products/r.osm.pbf").delete();
+    }
 
     @Test
     void should_throw_IllegalStateException_when_rail_road_shapefile_missing_in_ax_folder() {
